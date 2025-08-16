@@ -1,0 +1,8 @@
+.vscode
+.dart_tool
+pubspec.lock
+
+API_SPEC.md
+APP_SPEC.md
+dev.sh
+metaclip.json
