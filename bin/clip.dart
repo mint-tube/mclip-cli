@@ -5,20 +5,20 @@ import '../lib/commands.dart';
 
 Future<void> main(List<String> appArgs) async {
   if (appArgs.isEmpty) {
-    print('Usage: clip <command> [options]...');
+    print('Usage: clip <command> [args...]');
     print('');
     print('Available commands (to be implemented):');
-    print('  settings <key> <value>     Change setting <key> to <value>');
-    print('  settings list              Print current settings');
-    print('  ls                         List all stored items');
-    print('  search {id|name} <prefix>  Search items by id or name prefix');
-    print('  text [content]             Create text item with content');
-    print('  file <path>                Create file item with path');
-    print('  paste <id_prefix> [dir]    Fetch item by id prefix');
-    print('  delete <id_prefix>...      Delete item(s) by id prefix');
-    print('  raw "<query>"              Send SQL, print JSON');
+    print('  settings <key> <value>   Change setting <key> to <value>');
+    print('  settings list            Print current settings');
+    print('  ls                       List all stored items');
+    print('  search <prefix>          Search items by id/name prefix');
+    print('  text [content]           Create text with content from arg or stdin');
+    print('  file <path>              Upload file at path');
+    print('  paste <prefix> [dir]     Fetch an item by id/name prefix');
+    print('  delete <id_prefix>...    Delete item(s) by id prefix');
+    print('  raw "<query>"            Send SQL, print JSON');
     print('');
-    exit(1);
+    exit(0);
   }
 
   final command = appArgs[0];
@@ -59,17 +59,17 @@ Future<void> main(List<String> appArgs) async {
 
     default:
       stderr.writeln("Unknown command.");
-      print('Available:');
-      print('  settings <key> <value>     Change setting <key> to <value>');
-      print('  settings list               Print current settings');
-      print('  ls                         List all stored items');
-      print('  search {id|name} <prefix>  Search items by id or name prefix');
-      print('  text [content]             Create text item with content');
-      print('  file <path>                Create file item with path');
-      print('  paste <id_prefix> [dir]    Fetch item by id prefix');
-      print('  delete <id_prefix>...      Delete item(s) by id prefix');
-      print('  raw <query>                Send raw SQL query to server');
-      print('');
+      stderr.writeln('  settings <key> <value>   Change setting <key> to <value>');
+      stderr.writeln('  settings list            Print current settings');
+      stderr.writeln('  ls                       List all stored items');
+      stderr.writeln('  search <prefix>          Search items by id/name prefix');
+      stderr.writeln(
+          '  text [content]           Create text with content from arg or stdin');
+      stderr.writeln('  file <path>              Upload file at path');
+      stderr.writeln('  paste <prefix> [dir]     Fetch an item by id/name prefix');
+      stderr.writeln('  delete <id_prefix>...    Delete item(s) by id prefix');
+      stderr.writeln('  raw "<query>"            Send SQL, print JSON');
+      stderr.writeln('');
       exit(1);
   }
 }

@@ -6,7 +6,7 @@ import 'package:http/http.dart';
 import 'settings.dart';
 import 'pprint.dart';
 
-Future<List> execute(String query) async {
+Future<List<Map>> execute(String query) async {
   Response response;
   Map<String, dynamic> settings = await readSettings();
   Uri endpoint = settings['endpoint'];
@@ -14,8 +14,9 @@ Future<List> execute(String query) async {
 
   try {
     response = await post(endpoint,
-        headers: {"Authorization": token, "Content-Type": "text/plain"},
-        body: query);
+            headers: {"Authorization": token, "Content-Type": "text/plain"},
+            body: query)
+        .timeout(Duration(seconds: 20), onTimeout: () => throw TimeoutException(''));
   } on SocketException catch (e) {
     if (e.message.contains('Connection refused')) {
       stderr.writeln(
@@ -29,6 +30,9 @@ Future<List> execute(String query) async {
       );
     }
     exit(2);
+  } on TimeoutException {
+    stderr.writeln("Timeout: No response in 20 seconds");
+    exit(2);
   } catch (e) {
     stderr.writeln(
         'Unexpected Error: An error occurred while communicating with the server.');
@@ -37,7 +41,15 @@ Future<List> execute(String query) async {
 
   switch (response.statusCode) {
     case 200:
-      return jsonDecode(response.body) as List;
+      // decode json response
+      final List<dynamic> decoded = jsonDecode(response.body);
+      final List<Map> mapped = decoded.map((item) => item as Map).toList();
+
+      // decode base64 content
+      mapped.forEach((item) {
+        item["content"] = utf8.decode(base64.decode(item["content"]));
+      });
+      return mapped;
     case 401:
       stderr.writeln("Error: token was rejected");
       exit(1);
@@ -100,8 +112,8 @@ Future<void> settings(List<String> args) async {
 
 Future<void> ls(List<String> args) async {
   if (args.isNotEmpty) stderr.writeln("No arguments expected; ignoring.");
-  List<dynamic> items = await execute("SELECT * FROM items");
-  if (items.isNotEmpty) prettyPrint(items as List<Map>);
+  List<Map> items = await execute("SELECT * FROM items");
+  if (items.isNotEmpty) prettyPrint(items);
   exit(0);
 }
 

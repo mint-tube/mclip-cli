@@ -1,17 +1,17 @@
 import 'dart:io';
+import 'dart:math';
 
-String truncateId(String id, int maxLength) {
-  if (id.length <= maxLength) return id;
-  return id.substring(0, maxLength - 3) + '...';
+String formatId(String id, int targetLength) {
+  if (id.length <= targetLength) return id.padRight(targetLength);
+  return id.substring(0, targetLength - 3) + '...';
 }
 
-String truncateName(String name, int maxLength, {bool shortFormat = false}) {
-  if (name.length <= maxLength) return name;
-  if (shortFormat) {
-    return name.substring(0, 6) + '...' + name.substring(name.length - 6);
-  } else {
-    return name.substring(0, 20) + '...' + name.substring(name.length - 9);
-  }
+String formatName(String name, int targetLength) {
+  if (name.length <= targetLength) return name.padRight(targetLength);
+  if (targetLength < 9) return '...' + name.substring(name.length - targetLength);
+  return name.substring(0, targetLength - 9) +
+      '...' +
+      name.substring(name.length - 6);
 }
 
 String formatSize(int bytes) {
@@ -21,40 +21,42 @@ String formatSize(int bytes) {
   return '${(bytes / (1024 * 1024 * 1024)).round()} GB';
 }
 
-String formatContent(String content, int availableWidth) {
-  if (content.isEmpty) return '';
-  content = content.replaceAll('\n', ' ').replaceAll('\t', ' ');
-  if (content.length <= availableWidth) return content;
-  return content.substring(0, availableWidth - 3) + '...';
+String formatContent(String content, int targetWidth) {
+  content = content.replaceAll('\n', '  ').replaceAll('\t', '  ');
+  if (content.length <= targetWidth) return content.padRight(targetWidth);
+  return content.substring(0, targetWidth - 3) + '...';
 }
 
-void prettyPrint(List<dynamic> items) {
+void prettyPrint(List<Map> items) {
   if (items.isEmpty) return;
 
-  int cols = stdout.terminalColumns;
+  int cols;
+  if (stdout.hasTerminal)
+    cols = stdout.terminalColumns;
+  else
+    cols = 150;
   bool shortFormat = cols <= 100;
 
-  int idMaxLen = shortFormat ? 14 : 25;
-  int nameMaxLen = shortFormat ? 16 : 32;
+  int longestNameLen =
+      items.fold(0, (maxLen, item) => max(maxLen, item['name'].toString().length));
 
-  // Calculate available width for content
-  int separatorsWidth = shortFormat ? 9 : 12; // │ │ │ │ or │ │ │ │ │
-  int contentMaxLen = cols - idMaxLen - nameMaxLen - 12 - separatorsWidth;
-  if (contentMaxLen < 20) contentMaxLen = 20;
+  int idLenLimit = shortFormat ? 14 : 20;
+  int nameLenLimit = shortFormat ? min(longestNameLen, 16) : min(longestNameLen, 32);
+  int separatorsLen = shortFormat ? 6 : 10; //' │  │ 'or '│  │  │  │'
+  int contentLenLimit = cols - idLenLimit - nameLenLimit - separatorsLen;
+
+  // Ignore very slim terminals
+  if (contentLenLimit < 10) contentLenLimit = 20;
 
   for (var item in items) {
-    String id = truncateId(item['id']?.toString() ?? '', idMaxLen);
-    String name = truncateName(item['name']?.toString() ?? '', nameMaxLen,
-        shortFormat: shortFormat);
-    String size = formatSize(item['size']?.toInt() ?? 0);
-    String content = formatContent(item['content']?.toString() ?? '', contentMaxLen);
+    String id = formatId(item['id'], idLenLimit);
+    String name = formatName(item['name'], nameLenLimit);
+    String content = formatContent(item['content'], contentLenLimit);
 
     if (shortFormat) {
-      print(
-          '${id.padRight(idMaxLen)} │ ${name.padRight(nameMaxLen)} │ ${size.padRight(8)} │ $content');
+      print('${id} │ ${name} │ $content');
     } else {
-      print(
-          '│ ${id.padRight(idMaxLen)} │ ${name.padRight(nameMaxLen)} │ ${size.padRight(8)} │ $content │');
+      print('│ ${id} │ ${name} │ $content │');
     }
   }
 }
