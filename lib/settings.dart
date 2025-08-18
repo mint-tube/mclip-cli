@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'consts.dart';
+
 bool validateEndpoint(String endpoint) {
-  Uri uri = Uri.parse(endpoint);
+  final Uri uri = Uri.parse(endpoint);
   return (['http', 'https'].contains(uri.scheme) &&
       uri.authority.isNotEmpty &&
       uri.port > -2);
@@ -12,13 +14,13 @@ bool validateEndpoint(String endpoint) {
 // Read json file and validate some fields
 Future<Map<String, dynamic>> readSettings() async {
   try {
-    final homeDir = Platform.environment['HOME'];
-    final file = File("$homeDir/.config/metaclip.json");
+    final String? homeDir = Platform.environment['HOME'];
+    final File file = File("$homeDir/.config/metaclip.json");
     Map<String, dynamic> jsonData = {};
     List<String> unsetSettings = [];
 
     if (await file.exists()) {
-      final content = await file.readAsString();
+      final String content = await file.readAsString();
       jsonData = jsonDecode(content) as Map<String, dynamic>;
     }
     // endpoint
@@ -36,11 +38,11 @@ Future<Map<String, dynamic>> readSettings() async {
 
     if (unsetSettings.isNotEmpty) {
       stderr.writeln('Update the following settings:');
-      for (String setting in unsetSettings) {
+      for (final String setting in unsetSettings) {
         stderr.writeln(' - $setting');
       }
       stderr.writeln("Use 'clip settings <key> <value>'");
-      exit(1);
+      exit(Constants.UserError);
     }
 
     // Convert json
@@ -48,6 +50,6 @@ Future<Map<String, dynamic>> readSettings() async {
     return jsonData;
   } catch (e) {
     stderr.writeln('Error reading settings: $e');
-    exit(2);
+    exit(Constants.InternalError);
   }
 }

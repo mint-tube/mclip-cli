@@ -5,18 +5,20 @@ import 'package:http/http.dart';
 
 import 'settings.dart';
 import 'pprint.dart';
+import 'consts.dart';
 
-Future<List<Map>> execute(String query) async {
+Future<List<Map<String, dynamic>>> execute(String query) async {
   Response response;
   Map<String, dynamic> settings = await readSettings();
-  Uri endpoint = settings['endpoint'];
-  String token = settings['token'];
+  Uri endpoint = settings['endpoint'] as Uri;
+  String token = settings['token'] as String;
 
   try {
     response = await post(endpoint,
             headers: {"Authorization": token, "Content-Type": "text/plain"},
             body: query)
-        .timeout(Duration(seconds: 20), onTimeout: () => throw TimeoutException(''));
+        .timeout(Constants.timeoutDelay,
+            onTimeout: () => throw TimeoutException(''));
   } on SocketException catch (e) {
     if (e.message.contains('Connection refused')) {
       stderr.writeln(
@@ -29,34 +31,36 @@ Future<List<Map>> execute(String query) async {
         'Error details: ${e.message}',
       );
     }
-    exit(2);
+    exit(Constants.InternalError);
   } on TimeoutException {
-    stderr.writeln("Timeout: No response in 20 seconds");
-    exit(2);
+    stderr.writeln(
+        "Timeout: No response in ${Constants.timeoutDelay.inSeconds} seconds");
+    exit(Constants.InternalError);
   } catch (e) {
     stderr.writeln(
         'Unexpected Error: An error occurred while communicating with the server.');
-    exit(2);
+    exit(Constants.InternalError);
   }
 
   switch (response.statusCode) {
     case 200:
       // decode json response
       final List<dynamic> decoded = jsonDecode(response.body);
-      final List<Map> mapped = decoded.map((item) => item as Map).toList();
+      final List<Map<String, dynamic>> mapped =
+          decoded.map((item) => item as Map<String, dynamic>).toList();
 
       // decode base64 content
-      mapped.forEach((item) {
+      for (final item in mapped) {
         item["content"] = utf8.decode(base64.decode(item["content"]));
-      });
+      }
       return mapped;
     case 401:
       stderr.writeln("Error: token was rejected");
-      exit(1);
+      exit(Constants.UserError);
     default:
       stderr.writeln(
           "Request to ${endpoint} failed: ${response.statusCode} - ${response.reasonPhrase}");
-      exit(2);
+      exit(Constants.InternalError);
   }
 }
 
@@ -67,10 +71,11 @@ Future<void> settings(List<String> args) async {
   if (key == null) {
     print('Usage: clip settings <key> <value>');
     print("'clip settings list' will show current settings");
-    exit(1);
+    exit(Constants.UserError);
   }
 
-  final file = File("${Platform.environment['HOME']}/.config/metaclip.json");
+  final homeDir = Platform.environment['HOME'];
+  final file = File("$homeDir/.config/metaclip.json");
   Map<String, dynamic> jsonData = {};
   if (await file.exists()) {
     final content = await file.readAsString();
@@ -80,23 +85,23 @@ Future<void> settings(List<String> args) async {
   if (value == null) {
     if (key == 'list' || key == 'ls') {
       jsonData.forEach((key, value) => print("$key: $value"));
-      exit(0);
+      exit(Constants.Success);
     } else {
       print('Usage: clip settings <key> <value>');
       print('"clip settings list" will show current settings');
-      exit(1);
+      exit(Constants.UserError);
     }
   }
 
-  if (!['endpoint', 'token'].contains(key)) {
+  if (!Constants.validSettings.contains(key)) {
     stderr.writeln("Error: There's no '$key' setting.");
     stderr.writeln('View all keys with "clip settings list"');
-    exit(1);
+    exit(Constants.UserError);
   }
 
   if (key == 'endpoint' && !validateEndpoint(value)) {
     stderr.writeln('Error: Invalid endpoint URL');
-    exit(1);
+    exit(Constants.UserError);
   }
 
   jsonData[key] = value;
@@ -106,23 +111,23 @@ Future<void> settings(List<String> args) async {
     print('"$key" updated successfully');
   } catch (e) {
     print('Error saving settings: $e');
-    exit(2);
+    exit(Constants.InternalError);
   }
 }
 
 Future<void> ls(List<String> args) async {
   if (args.isNotEmpty) stderr.writeln("No arguments expected; ignoring.");
-  List<Map> items = await execute("SELECT * FROM items");
+  List<Map<String, dynamic>> items = await execute("SELECT * FROM items");
   if (items.isNotEmpty) prettyPrint(items);
-  exit(0);
+  exit(Constants.Success);
 }
 
 Future<void> raw(List<String> args) async {
   try {
-    final items = await execute(args.join(" "));
+    final List<Map<String, dynamic>> items = await execute(args.join(" "));
     print(JsonEncoder.withIndent('  ').convert(items));
   } catch (error) {
     stderr.writeln("Error executing command: $error");
-    exit(1);
+    exit(Constants.UserError);
   }
 }

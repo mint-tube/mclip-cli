@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'consts.dart';
+
 String formatId(String id, int targetLength) {
   if (id.length <= targetLength) return id.padRight(targetLength);
   return id.substring(0, targetLength - 3) + '...';
@@ -15,10 +17,10 @@ String formatName(String name, int targetLength) {
 }
 
 String formatSize(int bytes) {
-  if (bytes < 1024) return '$bytes B';
-  if (bytes < 1024 * 1024) return '${(bytes / 1024).round()} KB';
-  if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).round()} MB';
-  return '${(bytes / (1024 * 1024 * 1024)).round()} GB';
+  if (bytes < Constants.KB) return '$bytes B';
+  if (bytes < Constants.MB) return '${(bytes / Constants.KB).round()} KB';
+  if (bytes < Constants.GB) return '${(bytes / Constants.MB).round()} MB';
+  return '${(bytes / Constants.GB).round()} GB';
 }
 
 String formatContent(String content, int targetWidth) {
@@ -27,18 +29,18 @@ String formatContent(String content, int targetWidth) {
   return content.substring(0, targetWidth - 3) + '...';
 }
 
-void prettyPrint(List<Map> items) {
+void prettyPrint(List<Map<String, dynamic>> items) {
   if (items.isEmpty) return;
 
   int cols;
   if (stdout.hasTerminal)
     cols = stdout.terminalColumns;
   else
-    cols = 150;
-  bool shortFormat = cols <= 100;
+    cols = Constants.defaultOutputWidth;
+  bool shortFormat = cols <= Constants.shortFormatThreshold;
 
-  int longestNameLen =
-      items.fold(0, (maxLen, item) => max(maxLen, item['name'].toString().length));
+  int longestNameLen = items.fold(
+      0, (maxLen, item) => max(maxLen, (item['name'] as String).toString().length));
 
   int idLenLimit = shortFormat ? 14 : 20;
   int nameLenLimit = shortFormat ? min(longestNameLen, 16) : min(longestNameLen, 32);
@@ -48,10 +50,10 @@ void prettyPrint(List<Map> items) {
   // Ignore very slim terminals
   if (contentLenLimit < 10) contentLenLimit = 20;
 
-  for (var item in items) {
-    String id = formatId(item['id'], idLenLimit);
-    String name = formatName(item['name'], nameLenLimit);
-    String content = formatContent(item['content'], contentLenLimit);
+  for (final Map<String, dynamic> item in items) {
+    String id = formatId(item['id'] as String, idLenLimit);
+    String name = formatName(item['name'] as String, nameLenLimit);
+    String content = formatContent(item['content'] as String, contentLenLimit);
 
     if (shortFormat) {
       print('${id} │ ${name} │ $content');
