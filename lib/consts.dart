@@ -9,8 +9,4 @@ class Constants {
   static const int KB = 1024;
   static const int MB = 1024 * 1024;
   static const int GB = 1024 * 1024 * 1024;
-
-  static const int Success = 0;
-  static const int UserError = 1;
-  static const int InternalError = 2;
 }

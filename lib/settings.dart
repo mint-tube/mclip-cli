@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'consts.dart';
-
 bool validateEndpoint(String endpoint) {
   final Uri uri = Uri.parse(endpoint);
   return (['http', 'https'].contains(uri.scheme) &&
@@ -42,7 +40,7 @@ Future<Map<String, dynamic>> readSettings() async {
         stderr.writeln(' - $setting');
       }
       stderr.writeln("Use 'clip settings <key> <value>'");
-      exit(Constants.UserError);
+      exit(1);
     }
 
     // Convert json
@@ -50,6 +48,6 @@ Future<Map<String, dynamic>> readSettings() async {
     return jsonData;
   } catch (e) {
     stderr.writeln('Error reading settings: $e');
-    exit(Constants.InternalError);
+    exit(2);
   }
 }

@@ -31,15 +31,15 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
         'Error details: ${e.message}',
       );
     }
-    exit(Constants.InternalError);
+    exit(2);
   } on TimeoutException {
     stderr.writeln(
         "Timeout: No response in ${Constants.timeoutDelay.inSeconds} seconds");
-    exit(Constants.InternalError);
+    exit(2);
   } catch (e) {
     stderr.writeln(
         'Unexpected Error: An error occurred while communicating with the server.');
-    exit(Constants.InternalError);
+    exit(2);
   }
 
   switch (response.statusCode) {
@@ -56,11 +56,11 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
       return mapped;
     case 401:
       stderr.writeln("Error: token was rejected");
-      exit(Constants.UserError);
+      exit(1);
     default:
       stderr.writeln(
           "Request to ${endpoint} failed: ${response.statusCode} - ${response.reasonPhrase}");
-      exit(Constants.InternalError);
+      exit(2);
   }
 }
 
@@ -71,7 +71,7 @@ Future<void> settings(List<String> args) async {
   if (key == null) {
     print('Usage: clip settings <key> <value>');
     print("'clip settings list' will show current settings");
-    exit(Constants.UserError);
+    exit(1);
   }
 
   final homeDir = Platform.environment['HOME'];
@@ -85,23 +85,23 @@ Future<void> settings(List<String> args) async {
   if (value == null) {
     if (key == 'list' || key == 'ls') {
       jsonData.forEach((key, value) => print("$key: $value"));
-      exit(Constants.Success);
+      exit(0);
     } else {
       print('Usage: clip settings <key> <value>');
       print('"clip settings list" will show current settings');
-      exit(Constants.UserError);
+      exit(1);
     }
   }
 
   if (!Constants.validSettings.contains(key)) {
     stderr.writeln("Error: There's no '$key' setting.");
     stderr.writeln('View all keys with "clip settings list"');
-    exit(Constants.UserError);
+    exit(1);
   }
 
   if (key == 'endpoint' && !validateEndpoint(value)) {
     stderr.writeln('Error: Invalid endpoint URL');
-    exit(Constants.UserError);
+    exit(1);
   }
 
   jsonData[key] = value;
@@ -111,7 +111,7 @@ Future<void> settings(List<String> args) async {
     print('"$key" updated successfully');
   } catch (e) {
     print('Error saving settings: $e');
-    exit(Constants.InternalError);
+    exit(2);
   }
 }
 
@@ -119,7 +119,25 @@ Future<void> ls(List<String> args) async {
   if (args.isNotEmpty) stderr.writeln("No arguments expected; ignoring.");
   List<Map<String, dynamic>> items = await execute("SELECT * FROM items");
   if (items.isNotEmpty) prettyPrint(items);
-  exit(Constants.Success);
+  exit(0);
+}
+
+// Future<void> search(List<String> args) async {
+
+// }
+
+Future<void> delete(List<String> args) async {
+  if (args.isEmpty) {
+    stderr.writeln("Usage: clip delete [prefix..]");
+    exit(1);
+  }
+  List<Map<String, dynamic>> deleted = await execute(
+      "SELECT name FROM items WHERE id LIKE '${args[0]}%' OR name LIKE '${args[0]}%';" +
+          "DELETE FROM items WHERE id LIKE '${args[0]}%' OR name LIKE '${args[0]}%'");
+  if (deleted.isEmpty)
+    print("No items were deleted");
+  else
+    print("Deleted ${deleted.length} items");
 }
 
 Future<void> raw(List<String> args) async {
@@ -128,6 +146,6 @@ Future<void> raw(List<String> args) async {
     print(JsonEncoder.withIndent('  ').convert(items));
   } catch (error) {
     stderr.writeln("Error executing command: $error");
-    exit(Constants.UserError);
+    exit(1);
   }
 }

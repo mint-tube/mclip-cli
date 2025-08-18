@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import '../lib/commands.dart';
-import '../lib/consts.dart';
 
 Future<void> main(List<String> appArgs) async {
   if (appArgs.isEmpty) {
     print(_usageMessage);
-    exit(Constants.Success);
+    exit(0);
   }
 
   final String command = appArgs[0];
@@ -16,11 +15,11 @@ Future<void> main(List<String> appArgs) async {
   switch (command) {
     case 'settings':
       await settings(args);
-      exit(Constants.Success);
+      exit(0);
 
     case 'ls':
       await ls(args);
-      break;
+      exit(0);
 
     // case 'search':
     //   search(args);
@@ -38,18 +37,18 @@ Future<void> main(List<String> appArgs) async {
     //   paste(args);
     //   break;
 
-    // case 'delete':
-    //   delete(args);
-    //   break;
+    case 'delete':
+      await delete(args);
+      exit(0);
 
     case 'raw':
       await raw(args);
-      exit(Constants.Success);
+      exit(0);
 
     default:
       stderr.writeln("Unknown command.");
       stderr.writeln(_usageMessage);
-      exit(Constants.UserError);
+      exit(1);
   }
 }
 
@@ -60,9 +59,9 @@ Available commands (not all are implemented):
   settings list            Print current settings
   ls                       List all stored items
   search <prefix>          Search items by id/name prefix
-  text [content]          Create text with content from arg or stdin
+  text [content]           Create text with content from arg or stdin
   file <path>              Upload file at path
   paste <prefix> [dir]     Fetch an item by id/name prefix
-  delete <id_prefix>...    Delete item(s) by id prefix
+  delete <prefix>          Delete item(s) with id/name starting with prefix
   raw "<query>"            Send SQL, print JSON
 ''';
