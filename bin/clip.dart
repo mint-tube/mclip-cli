@@ -3,7 +3,7 @@ import 'dart:io';
 
 import '../lib/commands.dart';
 
-Future<void> main(List<String> appArgs) async {
+Future<Never> main(List<String> appArgs) async {
   if (appArgs.isEmpty) {
     print(_usageMessage);
     exit(0);
@@ -21,21 +21,21 @@ Future<void> main(List<String> appArgs) async {
       await ls(args);
       exit(0);
 
-    // case 'search':
-    //   search(args);
-    //   break;
+    case 'search':
+      await search(args);
+      exit(0);
 
-    // case 'text':
-    //   text(args);
-    //   break;
+    case 'text':
+      await text(args);
+      exit(0);
 
     // case 'file':
     //   file(args);
-    //   break;
+    //   exit(0);
 
     // case 'paste':
     //   paste(args);
-    //   break;
+    //   exit(0);
 
     case 'delete':
       await delete(args);

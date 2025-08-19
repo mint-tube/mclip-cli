@@ -1,11 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart';
 
 import 'settings.dart';
 import 'pprint.dart';
 import 'consts.dart';
+import 'convert.dart';
+
+String newId() {
+  final random = Random();
+  final bytes = List<int>.generate(Consts.bytesInId, (i) => random.nextInt(256));
+  return hexEncode(bytes);
+}
 
 Future<List<Map<String, dynamic>>> execute(String query) async {
   Response response;
@@ -17,8 +25,7 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
     response = await post(endpoint,
             headers: {"Authorization": token, "Content-Type": "text/plain"},
             body: query)
-        .timeout(Constants.timeoutDelay,
-            onTimeout: () => throw TimeoutException(''));
+        .timeout(Consts.timeoutDelay, onTimeout: () => throw TimeoutException(''));
   } on SocketException catch (e) {
     if (e.message.contains('Connection refused')) {
       stderr.writeln(
@@ -33,8 +40,8 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
     }
     exit(2);
   } on TimeoutException {
-    stderr.writeln(
-        "Timeout: No response in ${Constants.timeoutDelay.inSeconds} seconds");
+    stderr
+        .writeln("Timeout: No response in ${Consts.timeoutDelay.inSeconds} seconds");
     exit(2);
   } catch (e) {
     stderr.writeln(
@@ -51,7 +58,11 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
 
       // decode base64 content
       for (final item in mapped) {
-        item["content"] = utf8.decode(base64.decode(item["content"]));
+        if (item.length != 4) {
+          stderr.writeln("Error: Unprocessable response from server");
+          exit(2);
+        }
+        item["content"] = utf8.decode(hexDecode(item["content"]));
       }
       return mapped;
     case 401:
@@ -93,7 +104,7 @@ Future<void> settings(List<String> args) async {
     }
   }
 
-  if (!Constants.validSettings.contains(key)) {
+  if (!Consts.validSettings.contains(key)) {
     stderr.writeln("Error: There's no '$key' setting.");
     stderr.writeln('View all keys with "clip settings list"');
     exit(1);
@@ -116,19 +127,77 @@ Future<void> settings(List<String> args) async {
 }
 
 Future<void> ls(List<String> args) async {
-  if (args.isNotEmpty) stderr.writeln("No arguments expected; ignoring.");
+  if (args.isNotEmpty) {
+    stderr.writeln("No arguments expected; ignoring.");
+  }
   List<Map<String, dynamic>> items = await execute("SELECT * FROM items");
-  if (items.isNotEmpty) prettyPrint(items);
-  exit(0);
+  prettyPrint(items, stdout);
 }
 
-// Future<void> search(List<String> args) async {
+Future<void> search(List<String> args) async {
+  if (args.length != 1) {
+    stderr.writeln("Usage: clip delete [prefix..]");
+    exit(1);
+  }
+  if (args[0].trim() == '') {
+    stderr.writeln("Error: Invalid prefix");
+    exit(1);
+  }
+
+  List<Map<String, dynamic>> found = await execute(
+      "SELECT * FROM items WHERE id LIKE '${args[0]}%' OR name LIKE '${args[0]}%'");
+  prettyPrint(found, stdout);
+}
+
+Future<void> text(List<String> args) async {
+  if (args.isEmpty) {
+    stderr.writeln("Usage: clip text <name>");
+    exit(1);
+  }
+
+  StringBuffer buffer = StringBuffer();
+  String? line;
+
+  stdin.hasTerminal ? print("Ctrl+D to finish") : null;
+  while (true) {
+    line = stdin.readLineSync();
+    if (line == null) break;
+    buffer.writeln(line);
+  }
+
+  String contentString = buffer.toString();
+
+  String id = newId();
+  String content = hexEncode(utf8.encode(contentString));
+  String name = args.join(' ').replaceAll("'", "''");
+
+  await execute(
+      "INSERT INTO items (id, type, name, content) values ('$id', 'text', '$name', X'$content')");
+}
+
+// Future<void> file(List<String> args) async {
 
 // }
 
 Future<void> delete(List<String> args) async {
-  if (args.isEmpty) {
+  if (args.length != 1) {
     stderr.writeln("Usage: clip delete [prefix..]");
+    exit(1);
+  }
+  if (args[0].trim() == '') {
+    stderr.writeln("Error: Invalid prefix");
+    exit(1);
+  }
+
+  List<Map<String, dynamic>> found = await execute(
+      "SELECT name FROM items WHERE id LIKE '${args[0]}%' OR name LIKE '${args[0]}%'");
+  if (found.length == 0) {
+    stderr.writeln("No items with this id/name prefix");
+    exit(1);
+  }
+  if (found.length != 1) {
+    stderr.writeln("More than 1 item with such prefix/id exists. Specify.");
+    prettyPrint(found, stderr);
     exit(1);
   }
   List<Map<String, dynamic>> deleted = await execute(
@@ -141,11 +210,9 @@ Future<void> delete(List<String> args) async {
 }
 
 Future<void> raw(List<String> args) async {
-  try {
-    final List<Map<String, dynamic>> items = await execute(args.join(" "));
-    print(JsonEncoder.withIndent('  ').convert(items));
-  } catch (error) {
-    stderr.writeln("Error executing command: $error");
-    exit(1);
+  if (args.isEmpty) {
+    stderr.writeln('Usage: clip raw "<query>');
   }
+  List<Map<String, dynamic>> items = await execute(args.join(" "));
+  print(JsonEncoder.withIndent('  ').convert(items));
 }
