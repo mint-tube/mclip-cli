@@ -25,18 +25,29 @@ String formatSize(int bytes) {
     return '${(bytes / Consts.GB).round()} GB';
 }
 
-String formatFileContent(String content, int targetWidth) {
-  // Normalize EOF symbols and line endings
-  content = content
-      .replaceAll('\r\n', '  ')
-      .replaceAll('\r', '  ')
-      .replaceAll('\n', '  ')
-      .replaceAll('\x1a', '') // EOF
-      .trimRight();
+String formatFileContent(dynamic content, int sizeRaw, int targetWidth) {
+  String size = formatSize(sizeRaw).padRight(7);
+  String displayContent;
 
-  if (content.length > targetWidth - 10)
-    content = '${content.substring(0, targetWidth - 12)}...';
-  return '${formatSize(content.length)} | $content';
+  if (content is List<int>) {
+    displayContent = 'binary file';
+  } else if (content is String) {
+    displayContent = content
+        .replaceAll('\r\n', '  ')
+        .replaceAll('\r', '  ')
+        .replaceAll('\n', '  ')
+        .trim();
+
+    int contentWidth = targetWidth - 10;
+    if (displayContent.length > contentWidth) {
+      displayContent = displayContent.substring(0, contentWidth - 3) + '...';
+    }
+  } else {
+    size = formatSize(0);
+    displayContent = 'unknown type';
+  }
+
+  return '${size} │ $displayContent';
 }
 
 String formatTextContent(String content, int targetWidth) {
@@ -46,9 +57,19 @@ String formatTextContent(String content, int targetWidth) {
 }
 
 void prettyPrint(List<Map<String, dynamic>> items, StringSink out) {
+  /*
+  Expected fields in every item: 
+  String name;
+  String type;
+  String name;
+  String | List<Int> content;
+  int size
+  */
   int cols;
-  if (stdout.hasTerminal)
+  if (out == stdout && stdout.hasTerminal)
     cols = stdout.terminalColumns;
+  else if (out == stderr && stderr.hasTerminal)
+    cols = stderr.terminalColumns;
   else
     cols = Consts.defaultOutputWidth;
   bool shortFormat = cols <= Consts.shortFormatThreshold;
@@ -56,7 +77,7 @@ void prettyPrint(List<Map<String, dynamic>> items, StringSink out) {
   int longestNameLen = items.fold(
       0, (maxLen, item) => max(maxLen, (item['name'] as String).toString().length));
 
-  int idLenLimit = shortFormat ? 8 : 16;
+  int idLenLimit = shortFormat ? 6 : 12;
   int nameLenLimit = shortFormat ? min(longestNameLen, 16) : min(longestNameLen, 32);
   int separatorsLen = shortFormat ? 6 : 10; //' │  │ 'or '│  │  │  │'
   int contentLenLimit = cols - idLenLimit - nameLenLimit - separatorsLen;
@@ -69,9 +90,9 @@ void prettyPrint(List<Map<String, dynamic>> items, StringSink out) {
     String name = formatName(item['name'] as String, nameLenLimit);
     String content;
     if (item['type'] == 'text')
-      content = formatTextContent(item['content'] as String, contentLenLimit);
+      content = formatTextContent(item['content'], contentLenLimit);
     else if (item['type'] == 'file')
-      content = formatFileContent(item['content'] as String, contentLenLimit);
+      content = formatFileContent(item['content'], item['size'], contentLenLimit);
     else
       content = 'unknown type';
 
