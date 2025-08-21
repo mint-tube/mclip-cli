@@ -1,7 +1,7 @@
 .vscode
 .dart_tool
+dev.sh
+
 pubspec.lock
 mclip
-
-# API_SPEC.md
-dev.sh
+mclip.exe

@@ -1,2 +1,5 @@
-`dart pub get`  
-`dart compile exe mclip.dart -o mclip`
+## Metaclip command-line interface
+
+Run without any arguments to see the usage message
+
+Config is store in `$HOME/.config/metaclip.json` on Linux/MacOS and `%AppData%\metaclip\config.json` on Windows

@@ -240,8 +240,8 @@ Future<void> paste(List<String> args) async {
   }
 
   String prefix = args[0].replaceAll("'", "''");
-  List<Map<String, dynamic>> found = await execute(
-      """SELECT id, type, name, substr(content, 1, 400) as content, length(content) as size FROM items
+  List<Map<String, dynamic>> found =
+      await execute("""SELECT id, type, name, content FROM items
       WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'""");
 
   if (found.isEmpty) {
@@ -260,7 +260,7 @@ Future<void> paste(List<String> args) async {
     String? dir = args.elementAtOrNull(1) ?? Directory.current.path;
     File file = File(dir + Platform.pathSeparator + item['name']);
     file.createSync(recursive: true);
-    file.writeAsBytesSync(hexDecode(item['content']));
+    file.writeAsBytesSync(item['content']);
   } else {
     print(item["content"]);
   }
