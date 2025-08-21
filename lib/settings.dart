@@ -79,7 +79,7 @@ Future<Map<String, dynamic>> readSettings() async {
       for (final String setting in unsetSettings) {
         stderr.writeln(' - $setting');
       }
-      stderr.writeln("Use 'clip settings <key> <value>'");
+      stderr.writeln("Use 'mclip settings <key> <value>'");
       exit(1);
     }
 

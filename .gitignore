@@ -1,8 +1,7 @@
 .vscode
 .dart_tool
 pubspec.lock
-metaclip.json
-clip
+mclip
 
 # API_SPEC.md
 dev.sh

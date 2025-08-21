@@ -17,7 +17,7 @@ Future<void> main(List<String> appArgs) async {
     exit(1);
   }
 
-  // clip delete 52e -> delete([52e])
+  // mclip delete 52e -> delete([52e])
   await handler(appArgs.sublist(1));
 }
 
@@ -34,7 +34,7 @@ const Map<String, Future<void> Function(List<String>)> commands = {
 };
 
 const String _usageMessage = '''
-Usage: clip <command> [args...]
+Usage: mclip <command> [args...]
 Available commands (not all are implemented):
   settings <key> <value>   Change setting <key> to <value>
   settings ls              Print current settings

@@ -84,8 +84,8 @@ Future<void> settings(List<String> args) async {
   String? value = args.elementAtOrNull(1);
 
   if (key == null) {
-    print('Usage: clip settings <key> <value>');
-    print("'clip settings ls' will show current settings");
+    print('Usage: mclip settings <key> <value>');
+    print("'mclip settings ls' will show current settings");
     exit(1);
   }
 
@@ -101,15 +101,15 @@ Future<void> settings(List<String> args) async {
       jsonData.forEach((key, value) => print("$key: $value"));
       return;
     } else {
-      print('Usage: clip settings <key> <value>');
-      print("'clip settings ls' will show current settings");
+      print('Usage: mclip settings <key> <value>');
+      print("'mclip settings ls' will show current settings");
       exit(1);
     }
   }
 
   if (!Consts.validSettings.contains(key)) {
     stderr.writeln("Error: There's no '$key' setting.");
-    stderr.writeln('View all keys with "clip settings ls"');
+    stderr.writeln('View all keys with "mclip settings ls"');
     exit(1);
   }
 
@@ -160,7 +160,7 @@ Future<void> ls(List<String> args) async {
 
 Future<void> search(List<String> args) async {
   if (args.length != 1) {
-    stderr.writeln("Usage: clip search <prefix>");
+    stderr.writeln("Usage: mclip search <prefix>");
     exit(1);
   }
   if (args[0].trim() == '') {
@@ -177,7 +177,7 @@ Future<void> search(List<String> args) async {
 
 Future<void> text(List<String> args) async {
   if (args.isEmpty) {
-    stderr.writeln("Usage: clip text <name>");
+    stderr.writeln("Usage: mclip text <name>");
     exit(1);
   }
 
@@ -201,7 +201,7 @@ Future<void> text(List<String> args) async {
 
 Future<void> file(List<String> args) async {
   if (args.length != 1) {
-    stderr.writeln("Usage: clip file <path>");
+    stderr.writeln("Usage: mclip file <path>");
     exit(1);
   }
 
@@ -236,7 +236,7 @@ Future<void> paste(List<String> args) async {
   }
 
   if (args.length > 2) {
-    stderr.writeln('Usage: clip paste <prefix> [dir]');
+    stderr.writeln('Usage: mclip paste <prefix> [dir]');
   }
 
   String prefix = args[0].replaceAll("'", "''");
@@ -268,7 +268,7 @@ Future<void> paste(List<String> args) async {
 
 Future<void> delete(List<String> args) async {
   if (args.length != 1) {
-    stderr.writeln("Usage: clip delete <prefix>");
+    stderr.writeln("Usage: mclip delete <prefix>");
     exit(1);
   }
   if (args[0].trim() == '') {
@@ -303,7 +303,7 @@ Future<void> purge(List<String> args) async {
 
 Future<void> raw(List<String> args) async {
   if (args.isEmpty) {
-    stderr.writeln('Usage: clip raw "<query>');
+    stderr.writeln('Usage: mclip raw "<query>');
   }
   List<Map<String, dynamic>> items = await execute(args.join(" "));
   print(JsonEncoder.withIndent('  ').convert(items));
