@@ -240,8 +240,8 @@ Future<void> paste(List<String> args) async {
   }
 
   String prefix = args[0].replaceAll("'", "''");
-  List<Map<String, dynamic>> found =
-      await execute("""SELECT id, type, name, content FROM items
+  List<Map<String, dynamic>> found = await execute(
+      """SELECT id, type, name, content, length(content) as size FROM items
       WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'""");
 
   if (found.isEmpty) {

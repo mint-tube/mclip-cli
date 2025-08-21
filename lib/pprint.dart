@@ -30,7 +30,7 @@ String formatFileContent(dynamic content, int sizeRaw, int targetWidth) {
   String displayContent;
 
   if (content is List<int>) {
-    displayContent = 'binary file';
+    displayContent = '[binary]';
   } else if (content is String) {
     displayContent = content
         .replaceAll('\r\n', '  ')
@@ -38,16 +38,15 @@ String formatFileContent(dynamic content, int sizeRaw, int targetWidth) {
         .replaceAll('\n', '  ')
         .trim();
 
-    int contentWidth = targetWidth - 10;
-    if (displayContent.length > contentWidth) {
-      displayContent = displayContent.substring(0, contentWidth - 3) + '...';
+    if (displayContent.length > targetWidth - 10) {
+      displayContent = displayContent.substring(0, targetWidth - 13) + '...';
     }
   } else {
     size = formatSize(0);
     displayContent = 'unknown type';
   }
 
-  return '${size} │ $displayContent';
+  return '$size │ ${displayContent.padRight(targetWidth - 10)}';
 }
 
 String formatTextContent(String content, int targetWidth) {
@@ -79,7 +78,7 @@ void prettyPrint(List<Map<String, dynamic>> items, StringSink out) {
 
   int idLenLimit = shortFormat ? 6 : 12;
   int nameLenLimit = shortFormat ? min(longestNameLen, 16) : min(longestNameLen, 32);
-  int separatorsLen = shortFormat ? 6 : 10; //' │  │ 'or '│  │  │  │'
+  int separatorsLen = shortFormat ? 8 : 10; //' │  │ 'or '│  │  │  │'
   int contentLenLimit = cols - idLenLimit - nameLenLimit - separatorsLen;
 
   // Ignore very slim terminals
@@ -97,9 +96,9 @@ void prettyPrint(List<Map<String, dynamic>> items, StringSink out) {
       content = 'unknown type';
 
     if (shortFormat) {
-      out.writeln('${id} │ ${name} │ $content');
+      out.writeln(' $id │ $name │ $content ');
     } else {
-      out.writeln('│ ${id} │ ${name} │ $content │');
+      out.writeln('│ $id │ $name │ $content │');
     }
   }
 }

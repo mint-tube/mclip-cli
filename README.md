@@ -2,4 +2,4 @@
 
 Run without any arguments to see the usage message
 
-Config is store in `$HOME/.config/metaclip.json` on Linux/MacOS and `%AppData%\metaclip\config.json` on Windows
+Config is store in `$HOME/.config/metaclip.json` on Linux/MacOS and `%AppData%\metacli\config.json` on Windows
