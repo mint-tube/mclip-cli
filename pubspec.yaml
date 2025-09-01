@@ -1,6 +1,6 @@
-name: metaclip_cli
-description: command-line interface for metaclip.
-repository: https://github.com/mint-tube/metaclip-cli
+name: mclip_cli
+description: command-line interface for mclip.
+repository: https://github.com/mint-tube/mclip-cli
 
 platforms:
   linux:

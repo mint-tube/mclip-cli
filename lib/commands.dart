@@ -23,13 +23,11 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
   Duration timeout = settings['timeout'] as Duration;
 
   try {
-    response = await post(endpoint,
-            headers: {"Authorization": token, "Content-Type": "text/plain"},
-            body: query)
-        .timeout(
-      timeout,
-      onTimeout: () => throw TimeoutException(null),
-    );
+    response = await post(
+      endpoint,
+      headers: {"Authorization": token, "Content-Type": "text/plain"},
+      body: query,
+    ).timeout(timeout, onTimeout: () => throw TimeoutException(null));
   } on SocketException catch (e) {
     if (e.message.contains('Connection refused')) {
       stderr.writeln(
@@ -38,7 +36,7 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
       );
     } else {
       stderr.writeln(
-        'Network Error: Unable to connect to the metaclip server.\n'
+        'Network Error: Unable to connect to the mclip server.\n'
         'Error details: ${e.message}',
       );
     }
@@ -48,7 +46,8 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
     exit(2);
   } catch (e) {
     stderr.writeln(
-        'Unexpected Error: An error occurred while communicating with the server.');
+      'Unexpected Error: An error occurred while communicating with the server.',
+    );
     exit(2);
   }
 
@@ -56,8 +55,9 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
     case 200:
       // decode json response
       final List<dynamic> decoded = jsonDecode(response.body);
-      final List<Map<String, dynamic>> mapped =
-          decoded.map((item) => item as Map<String, dynamic>).toList();
+      final List<Map<String, dynamic>> mapped = decoded
+          .map((item) => item as Map<String, dynamic>)
+          .toList();
 
       // decode hex to bytes or string, whatever applicable
       for (final item in mapped) {
@@ -74,7 +74,8 @@ Future<List<Map<String, dynamic>>> execute(String query) async {
       exit(1);
     default:
       stderr.writeln(
-          "Request to ${endpoint} failed: ${response.statusCode} - ${response.reasonPhrase}");
+        "Request to ${endpoint} failed: ${response.statusCode} - ${response.reasonPhrase}",
+      );
       exit(2);
   }
 }
@@ -115,7 +116,7 @@ Future<void> settings(List<String> args) async {
 
   if (key == 'endpoint' && !validateEndpoint(value)) {
     stderr.writeln('Error: Invalid endpoint URL');
-    stderr.writeln('Example: https://metaclip.ru/api');
+    stderr.writeln('Example: https://mclip.ru/api');
     exit(1);
   }
 
@@ -154,7 +155,8 @@ Future<void> ls(List<String> args) async {
     stderr.writeln("No arguments expected; ignoring.");
   }
   List<Map<String, dynamic>> items = await execute(
-      "SELECT id, type, name, substr(content, 1, 400) as content, length(content) as size FROM items");
+    "SELECT id, type, name, substr(content, 1, 400) as content, length(content) as size FROM items",
+  );
   prettyPrint(items, stdout);
 }
 
@@ -170,8 +172,9 @@ Future<void> search(List<String> args) async {
 
   String prefix = args[0].replaceAll("'", "''");
   List<Map<String, dynamic>> found = await execute(
-      """SELECT id, type, name, substr(content, 1, 400) as content, length(content) as size FROM items
-      WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'""");
+    """SELECT id, type, name, substr(content, 1, 400) as content, length(content) as size FROM items
+      WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'""",
+  );
   prettyPrint(found, stdout);
 }
 
@@ -196,7 +199,8 @@ Future<void> text(List<String> args) async {
   String name = args.join(' ').replaceAll("'", "''");
 
   await execute(
-      "INSERT INTO items (id, type, name, content) values ('$id', 'text', '$name', X'$content')");
+    "INSERT INTO items (id, type, name, content) values ('$id', 'text', '$name', X'$content')",
+  );
 }
 
 Future<void> file(List<String> args) async {
@@ -226,7 +230,8 @@ Future<void> file(List<String> args) async {
   String content = hexEncode(await file.readAsBytes());
 
   await execute(
-      "INSERT INTO items (id, type, name, content) values ('$id', 'file', '$name', X'$content')");
+    "INSERT INTO items (id, type, name, content) values ('$id', 'file', '$name', X'$content')",
+  );
 }
 
 Future<void> paste(List<String> args) async {
@@ -241,8 +246,9 @@ Future<void> paste(List<String> args) async {
 
   String prefix = args[0].replaceAll("'", "''");
   List<Map<String, dynamic>> found = await execute(
-      """SELECT id, type, name, content, length(content) as size FROM items
-      WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'""");
+    """SELECT id, type, name, content, length(content) as size FROM items
+      WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'""",
+  );
 
   if (found.isEmpty) {
     stderr.writeln("No items with this prefix");
@@ -278,8 +284,9 @@ Future<void> delete(List<String> args) async {
 
   String prefix = args[0].replaceAll("'", "''");
   List<Map<String, dynamic>> found = await execute(
-      """SELECT id, type, name, substr(content, 1, 400) as content, length(content) as size FROM items
-      WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'""");
+    """SELECT id, type, name, substr(content, 1, 400) as content, length(content) as size FROM items
+      WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'""",
+  );
   if (found.isEmpty) {
     stderr.writeln("No items with this prefix");
     exit(1);
@@ -290,7 +297,8 @@ Future<void> delete(List<String> args) async {
     exit(1);
   }
   await execute(
-      "DELETE FROM items WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'");
+    "DELETE FROM items WHERE id LIKE '$prefix%' OR name LIKE '$prefix%'",
+  );
 }
 
 Future<void> purge(List<String> args) async {

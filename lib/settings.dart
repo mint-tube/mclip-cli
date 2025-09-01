@@ -5,19 +5,19 @@ String getConfigPath() {
   if (Platform.isWindows) {
     final appData = Platform.environment['APPDATA'];
     if (appData != null) {
-      return "$appData\\metaclip\\config.json";
+      return "$appData\\mclip\\config.json";
     }
     // Fallback to user profile
     final userProfile = Platform.environment['USERPROFILE'];
     if (userProfile != null) {
-      return "$userProfile\\metaclip\\config.json";
+      return "$userProfile\\mclip\\config.json";
     }
   }
 
   // Linux and macOS
   final homeDir = Platform.environment['HOME'];
   if (homeDir != null) {
-    return "$homeDir/.config/metaclip.json";
+    return "$homeDir/.config/mclip.json";
   }
 
   throw Exception('Could not determine config directory');
@@ -47,7 +47,7 @@ Future<Map<String, dynamic>> readSettings() async {
       unsetSettings.add('endpoint');
     } else if (!validateEndpoint(jsonData['endpoint'])) {
       stderr.writeln('Invalid API URL: ${jsonData['endpoint']}');
-      stderr.writeln('Example: https://metaclip.ru/api');
+      stderr.writeln('Example: https://mclip.ru/api');
       unsetSettings.add('endpoint');
     }
 
