@@ -6,10 +6,10 @@
 
 void add_common(argparse::ArgumentParser &parser) {
   parser.add_argument("-v", "--verbose")
-    .help("Enable verbose Logging")
+    .help("Enable verbose logging")
     .flag();
   parser.add_argument("-q", "--quiet")
-    .help("Don't write anything to the standard output")
+    .help("Disable any errors, warnings and status reports")
     .flag();
   parser.add_argument("-c", "--config")
     .help("Specify the config file to use")
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
   argparse::ArgumentParser sub_text("text", "", argparse::default_arguments::help);
   sub_text.add_description("Create a text item and print it's ID");
-  sub_text.add_argument("content")
+  sub_text.add_argument("TEXT")
     .help("Text to store. '_' to read from stdin");
   sub_text.add_argument("-n", "--name")
     .help("Name of the item. Empty by default")
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 
   argparse::ArgumentParser sub_file("file", "", argparse::default_arguments::help);
   sub_file.add_description("Create a file item and print it's ID");
-  sub_file.add_argument("source")
+  sub_file.add_argument("FILE")
     .help("Path to the file. '-' to read from stdin");
   sub_file.add_argument("-n", "--name")
     .help("Name of the item. Defaults to the name of the source")
@@ -48,7 +48,8 @@ int main(int argc, char **argv) {
 
   try {
     program.parse_args(argc, argv);
-  } catch (std::exception err) {
+  } catch (const std::exception &err) {
+    mlog::debug(typeid(err).name());
     mlog::fatal(err.what());
     exit(1);
   }

@@ -1,5 +1,5 @@
 #include "argparse.hpp"
-#include "json.hpp"
+// #include "json.hpp"
 #include "mlog.hpp"
 #include "mcfg.hpp"
 
@@ -12,8 +12,7 @@
   mlog::debug("Quiet? ", args.get<bool>("-q"));
   mlog::debug("Verbose? ", args.get<bool>("-v"));
   if (auto name = args.present("-n")) mlog::debug("Name is \"", name.value(), "\"");
-  else mlog::debug("No name!");
-  if (auto content = args.present("-n")) mlog::debug("The file is \"", content.value(), "\"");
-  else mlog::error("No content!");
+  else mlog::error("No name!");
+  mlog::debug("The file is \"", args.get<std::string>("FILE"), "\"");
   exit(0);
 }
