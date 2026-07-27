@@ -1,0 +1,24 @@
+{
+  "files.exclude": {
+    ".vscode": false,
+    ".git": true,
+    "LICENSE": true
+  },
+  "C_Cpp.default.cppStandard": "c++17",
+  "C_Cpp.default.cStandard": "c17",
+  "C_Cpp.formatting": "vcFormat",
+  "C_Cpp.vcFormat.indent.preprocessor": "leftmostColumn",
+  "C_Cpp.vcFormat.newLine.beforeCatch": false,
+  "C_Cpp.vcFormat.newLine.beforeElse": false,
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.function": "sameLine",
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "sameLine",
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.lambda": "sameLine",
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.namespace": "sameLine",
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.type": "sameLine",
+  "C_Cpp.vcFormat.newLine.beforeWhileInDoWhile": false,
+  "C_Cpp.vcFormat.space.afterComma": true,
+  "C_Cpp.vcFormat.space.aroundAssignmentOperator": "insert",
+  "C_Cpp.vcFormat.space.aroundBinaryOperator": "insert",
+  "C_Cpp.vcFormat.space.aroundTernaryOperator": "insert",
+  "C_Cpp.vcFormat.space.beforeBlockOpenBrace": true,
+}

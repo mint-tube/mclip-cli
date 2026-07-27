@@ -1,25 +1,3 @@
-/*
-* Copyright © 2020 Jørgen Lind
-
-* Permission to use, copy, modify, distribute, and sell this software and its
-* documentation for any purpose is hereby granted without fee, provided that
-* the above copyright notice appear in all copies and that both that copyright
-* notice and this permission notice appear in supporting documentation, and
-* that the name of the copyright holders not be used in advertising or
-* publicity pertaining to distribution of the software without specific,
-* written prior permission.  The copyright holders make no representations
-* about the suitability of this software for any purpose.  It is provided "as
-* is" without express or implied warranty.
-
-* THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
-* INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
-* EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
-* CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
-* DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-* TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-* OF THIS SOFTWARE.
-*/
-
 #pragma once
 
 #include <algorithm>
@@ -774,7 +752,7 @@ namespace JS {
       }
 
       return current - data;
-      }
+    }
 
     inline size_t skipCommentSIMD(const char *JSON_STRUCT_RESTRICT data, size_t length) {
       const char *current = data;
@@ -1075,7 +1053,7 @@ namespace JS {
     UnknownPropertyMember,
     UnknownError,
     UserDefinedErrors
-      };
+  };
 
   namespace Internal {
     class ErrorContext {
@@ -1692,7 +1670,7 @@ namespace JS {
       end++;
     }
     return Error::NeedMoreData;
-    }
+  }
 
   JSON_STRUCT_FORCE_INLINE Error Tokenizer::findAsciiEnd(const DataRef &json_data, size_t *chars_ahead) {
     assert(property_type == Type::Ascii);
@@ -1756,7 +1734,7 @@ namespace JS {
       }
     }
     return Error::NeedMoreData;
-    }
+  }
 
   JSON_STRUCT_FORCE_INLINE Error Tokenizer::findNumberEnd(const DataRef &json_data, size_t *chars_ahead) {
 #ifdef JSON_STRUCT_HAS_NEON
@@ -1795,7 +1773,7 @@ namespace JS {
       return Error::NoError;
     }
     return Error::NeedMoreData;
-    }
+  }
 
   JSON_STRUCT_FORCE_INLINE Error Tokenizer::findStartOfNextValue(Type *type, const DataRef &json_data,
     size_t *chars_ahead) {
@@ -1830,24 +1808,24 @@ namespace JS {
         *type = Type::String;
         *chars_ahead = current_pos - cursor_index;
         return Error::NoError;
-  } else if (JSON_STRUCT_LIKELY(c == '{')) {
-    *type = Type::ObjectStart;
-    *chars_ahead = current_pos - cursor_index;
-    return Error::NoError;
-  } else if (JSON_STRUCT_LIKELY(c == '}')) {
-    *type = Type::ObjectEnd;
-    *chars_ahead = current_pos - cursor_index;
-    return Error::NoError;
-  } else if (JSON_STRUCT_LIKELY(c == '[')) {
-    *type = Type::ArrayStart;
-    *chars_ahead = current_pos - cursor_index;
-    return Error::NoError;
-  } else if (JSON_STRUCT_LIKELY(c == ']')) {
-    *type = Type::ArrayEnd;
-    *chars_ahead = current_pos - cursor_index;
-    return Error::NoError;
-  }
-  }
+      } else if (JSON_STRUCT_LIKELY(c == '{')) {
+        *type = Type::ObjectStart;
+        *chars_ahead = current_pos - cursor_index;
+        return Error::NoError;
+      } else if (JSON_STRUCT_LIKELY(c == '}')) {
+        *type = Type::ObjectEnd;
+        *chars_ahead = current_pos - cursor_index;
+        return Error::NoError;
+      } else if (JSON_STRUCT_LIKELY(c == '[')) {
+        *type = Type::ArrayStart;
+        *chars_ahead = current_pos - cursor_index;
+        return Error::NoError;
+      } else if (JSON_STRUCT_LIKELY(c == ']')) {
+        *type = Type::ArrayEnd;
+        *chars_ahead = current_pos - cursor_index;
+        return Error::NoError;
+      }
+    }
 
     for (; current_pos < json_data.size; current_pos++) {
       const char c = json_data.data[current_pos];
@@ -1941,7 +1919,7 @@ namespace JS {
         cursor_index += comment_skip;
         end = cursor_index - 1;
         continue;
-  }
+      }
 
       // Cache container type to avoid multiple back() calls
       Type container_type = container_stack.back();
@@ -1967,9 +1945,9 @@ namespace JS {
       } else if (JSON_STRUCT_UNLIKELY(!(Internal::lookup()[(unsigned char)c] & Internal::WhiteSpaceOrNull))) {
         return Error::ExpectedDelimiter;
       }
-  }
-    return Error::NeedMoreData;
     }
+    return Error::NeedMoreData;
+  }
 
   JSON_STRUCT_FORCE_INLINE Error Tokenizer::findTokenEnd(const DataRef &json_data, size_t *chars_ahead) {
     if (JSON_STRUCT_UNLIKELY(container_stack.empty()))
@@ -2010,7 +1988,7 @@ namespace JS {
         cursor_index += comment_skip;
         end = cursor_index - 1;
         continue;
-  }
+      }
 
       if (JSON_STRUCT_LIKELY(c == ',')) {
         expecting_prop_or_anonymous_data = true;
@@ -2072,7 +2050,7 @@ namespace JS {
       return Error::NoError;
     }
     return Error::NeedMoreData;
-      }
+  }
 
   inline void Tokenizer::requestMoreData() {
     if (need_more_data_callback)
@@ -4501,10 +4479,10 @@ namespace JS {
           return Internal::FunctionCaller<T, U, Ret, Arg, NAME_COUNT, TAKES_CONTEXT>::callFunctionAndSerializeReturn(
             container, functionInfo, context);
         }
-        }
       }
-    return Error::MissingFunction;
     }
+    return Error::MissingFunction;
+  }
 
   namespace Internal {
     template <typename T, size_t INDEX>
@@ -4754,7 +4732,7 @@ namespace JS {
       }
     }
   } // namespace Internal
-  } // namespace JS
+} // namespace JS
 
 #define JS_ENUM(name, ...)                                                                                             \
   enum class name                                                                                                      \
@@ -5357,7 +5335,7 @@ namespace JS {
         }
         static inline constexpr int bias() noexcept {
           return (1 << (exponent_width() - 1)) - 1;
-    }
+        }
         static inline constexpr int max_base10_exponent() noexcept {
           return 308;
         }
@@ -5440,7 +5418,7 @@ namespace JS {
             q |= uint64_t(1) << 63;
           memcpy(&to_digit, &q, sizeof(q));
         }
-  };
+      };
 
       template <typename T>
       inline void get_parts(T f, bool &negative, int &exp, uint64_t &mentissa) {
@@ -7375,9 +7353,9 @@ namespace JS {
         return to_ieee_t(str, size, target, endptr);
       }
 
-} // namespace ft
-    } // namespace Internal
-    /// \private
+    } // namespace ft
+  } // namespace Internal
+  /// \private
   template <>
   struct TypeHandler<double> {
     static inline Error to(double &to_type, ParseContext &context) {
@@ -7758,10 +7736,10 @@ namespace JS {
         error = context.nextToken();
         if (error != JS::Error::NoError)
           break;
-    }
+      }
 
       return error;
-  }
+    }
 
     static inline void from(const std::vector<T, A> &vec, Token &token, Serializer &serializer) {
       token.value_type = Type::ArrayStart;
@@ -8837,3 +8815,27 @@ namespace JS {
   };
 } // namespace JS
 #endif
+
+/*
+  https://github.com/jorgen/json_struct
+
+  Copyright © 2020 Jørgen Lind
+
+  Permission to use, copy, modify, distribute, and sell this software and its
+  documentation for any purpose is hereby granted without fee, provided that
+  the above copyright notice appear in all copies and that both that copyright
+  notice and this permission notice appear in supporting documentation, and
+  that the name of the copyright holders not be used in advertising or
+  publicity pertaining to distribution of the software without specific,
+  written prior permission.  The copyright holders make no representations
+  about the suitability of this software for any purpose.  It is provided "as
+  is" without express or implied warranty.
+
+  THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+  INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+  EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+  CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+  DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+  TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+  OF THIS SOFTWARE.
+*/
