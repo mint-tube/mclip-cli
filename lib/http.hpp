@@ -1,218 +1,91 @@
-#ifndef CPPHTTPLIB_HTTPLIB_H
-#define CPPHTTPLIB_HTTPLIB_H
+#pragma once
 
-#define CPPHTTPLIB_VERSION "0.53.1"
-#define CPPHTTPLIB_VERSION_NUM "0x003501"
-
-#ifdef _WIN32
-#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0A00
-#error                                                                         \
-    "cpp-httplib doesn't support Windows 8 or lower. Please use Windows 10 or later."
-#endif
-#endif
-
-/*
- * Configuration
- */
-
-#ifndef CPPHTTPLIB_KEEPALIVE_TIMEOUT_SECOND
 #define CPPHTTPLIB_KEEPALIVE_TIMEOUT_SECOND 5
-#endif
 
-#ifndef CPPHTTPLIB_KEEPALIVE_TIMEOUT_CHECK_INTERVAL_USECOND
 #define CPPHTTPLIB_KEEPALIVE_TIMEOUT_CHECK_INTERVAL_USECOND 10000
-#endif
 
-#ifndef CPPHTTPLIB_KEEPALIVE_MAX_COUNT
 #define CPPHTTPLIB_KEEPALIVE_MAX_COUNT 100
-#endif
 
-#ifndef CPPHTTPLIB_CONNECTION_TIMEOUT_SECOND
 #define CPPHTTPLIB_CONNECTION_TIMEOUT_SECOND 300
-#endif
 
-#ifndef CPPHTTPLIB_CONNECTION_TIMEOUT_USECOND
 #define CPPHTTPLIB_CONNECTION_TIMEOUT_USECOND 0
-#endif
 
-#ifndef CPPHTTPLIB_SERVER_READ_TIMEOUT_SECOND
 #define CPPHTTPLIB_SERVER_READ_TIMEOUT_SECOND 5
-#endif
 
-#ifndef CPPHTTPLIB_SERVER_READ_TIMEOUT_USECOND
 #define CPPHTTPLIB_SERVER_READ_TIMEOUT_USECOND 0
-#endif
 
-#ifndef CPPHTTPLIB_SERVER_WRITE_TIMEOUT_SECOND
 #define CPPHTTPLIB_SERVER_WRITE_TIMEOUT_SECOND 5
-#endif
 
-#ifndef CPPHTTPLIB_SERVER_WRITE_TIMEOUT_USECOND
 #define CPPHTTPLIB_SERVER_WRITE_TIMEOUT_USECOND 0
-#endif
 
-#ifndef CPPHTTPLIB_CLIENT_READ_TIMEOUT_SECOND
 #define CPPHTTPLIB_CLIENT_READ_TIMEOUT_SECOND 300
-#endif
 
-#ifndef CPPHTTPLIB_CLIENT_READ_TIMEOUT_USECOND
 #define CPPHTTPLIB_CLIENT_READ_TIMEOUT_USECOND 0
-#endif
 
-#ifndef CPPHTTPLIB_CLIENT_WRITE_TIMEOUT_SECOND
 #define CPPHTTPLIB_CLIENT_WRITE_TIMEOUT_SECOND 5
-#endif
 
-#ifndef CPPHTTPLIB_CLIENT_WRITE_TIMEOUT_USECOND
 #define CPPHTTPLIB_CLIENT_WRITE_TIMEOUT_USECOND 0
-#endif
 
-#ifndef CPPHTTPLIB_CLIENT_MAX_TIMEOUT_MSECOND
 #define CPPHTTPLIB_CLIENT_MAX_TIMEOUT_MSECOND 0
-#endif
 
-#ifndef CPPHTTPLIB_EXPECT_100_THRESHOLD
 #define CPPHTTPLIB_EXPECT_100_THRESHOLD 1024
-#endif
 
-#ifndef CPPHTTPLIB_EXPECT_100_TIMEOUT_MSECOND
 #define CPPHTTPLIB_EXPECT_100_TIMEOUT_MSECOND 1000
-#endif
 
-#ifndef CPPHTTPLIB_WAIT_EARLY_SERVER_RESPONSE_THRESHOLD
 #define CPPHTTPLIB_WAIT_EARLY_SERVER_RESPONSE_THRESHOLD (1024 * 1024)
-#endif
 
-#ifndef CPPHTTPLIB_WAIT_EARLY_SERVER_RESPONSE_TIMEOUT_MSECOND
 #define CPPHTTPLIB_WAIT_EARLY_SERVER_RESPONSE_TIMEOUT_MSECOND 50
-#endif
 
-#ifndef CPPHTTPLIB_IDLE_INTERVAL_SECOND
 #define CPPHTTPLIB_IDLE_INTERVAL_SECOND 0
-#endif
 
-#ifndef CPPHTTPLIB_IDLE_INTERVAL_USECOND
 #ifdef _WIN32
 #define CPPHTTPLIB_IDLE_INTERVAL_USECOND 1000
 #else
 #define CPPHTTPLIB_IDLE_INTERVAL_USECOND 0
 #endif
-#endif
 
-#ifndef CPPHTTPLIB_REQUEST_URI_MAX_LENGTH
 #define CPPHTTPLIB_REQUEST_URI_MAX_LENGTH 8192
-#endif
 
-#ifndef CPPHTTPLIB_HEADER_MAX_LENGTH
 #define CPPHTTPLIB_HEADER_MAX_LENGTH 8192
-#endif
 
-#ifndef CPPHTTPLIB_HEADER_MAX_COUNT
 #define CPPHTTPLIB_HEADER_MAX_COUNT 100
-#endif
 
-#ifndef CPPHTTPLIB_REDIRECT_MAX_COUNT
 #define CPPHTTPLIB_REDIRECT_MAX_COUNT 20
-#endif
 
-#ifndef CPPHTTPLIB_MULTIPART_FORM_DATA_FILE_MAX_COUNT
 #define CPPHTTPLIB_MULTIPART_FORM_DATA_FILE_MAX_COUNT 1024
-#endif
 
-#ifndef CPPHTTPLIB_PAYLOAD_MAX_LENGTH
 #define CPPHTTPLIB_PAYLOAD_MAX_LENGTH (100 * 1024 * 1024) // 100MB
-#endif
 
-#ifndef CPPHTTPLIB_FORM_URL_ENCODED_PAYLOAD_MAX_LENGTH
 #define CPPHTTPLIB_FORM_URL_ENCODED_PAYLOAD_MAX_LENGTH 8192
-#endif
 
-#ifndef CPPHTTPLIB_RANGE_MAX_COUNT
 #define CPPHTTPLIB_RANGE_MAX_COUNT 1024
-#endif
 
- // std::regex_match's backtracking implementation (most acutely on libstdc++)
- // recurses roughly once per matched character for quantified patterns such
- // as "(.*)", so a long enough path can exhaust the calling thread's stack; on
- // a default ~8MB thread stack that has been observed to take on the order of
- // a couple thousand characters for a simple pattern. 256 leaves a wide safety
- // margin below that (well under the 8192-byte request URI limit) while still
- // fitting any realistic route segment; raise it if a route legitimately needs
- // longer paths. Regex routes are never applied to paths longer than this.
-#ifndef CPPHTTPLIB_REGEX_ROUTE_PATH_MAX_LENGTH
-#define CPPHTTPLIB_REGEX_ROUTE_PATH_MAX_LENGTH 256
-#endif
-
-#ifndef CPPHTTPLIB_TCP_NODELAY
 #define CPPHTTPLIB_TCP_NODELAY false
-#endif
 
-#ifndef CPPHTTPLIB_IPV6_V6ONLY
 #define CPPHTTPLIB_IPV6_V6ONLY false
-#endif
 
-#ifndef CPPHTTPLIB_RECV_BUFSIZ
 #define CPPHTTPLIB_RECV_BUFSIZ size_t(16384u)
-#endif
 
-#ifndef CPPHTTPLIB_SEND_BUFSIZ
 #define CPPHTTPLIB_SEND_BUFSIZ size_t(16384u)
-#endif
 
-#ifndef CPPHTTPLIB_COMPRESSION_BUFSIZ
 #define CPPHTTPLIB_COMPRESSION_BUFSIZ size_t(16384u)
-#endif
 
-#ifndef CPPHTTPLIB_THREAD_POOL_COUNT
 #define CPPHTTPLIB_THREAD_POOL_COUNT                                           \
   ((std::max)(8u, std::thread::hardware_concurrency() > 0                      \
                       ? std::thread::hardware_concurrency() - 1                \
                       : 0))
-#endif
 
-#ifndef CPPHTTPLIB_THREAD_POOL_MAX_COUNT
 #define CPPHTTPLIB_THREAD_POOL_MAX_COUNT (CPPHTTPLIB_THREAD_POOL_COUNT * 4)
-#endif
 
-#ifndef CPPHTTPLIB_THREAD_POOL_IDLE_TIMEOUT
 #define CPPHTTPLIB_THREAD_POOL_IDLE_TIMEOUT 3 // seconds
-#endif
 
-#ifndef CPPHTTPLIB_RECV_FLAGS
 #define CPPHTTPLIB_RECV_FLAGS 0
-#endif
 
-#ifndef CPPHTTPLIB_SEND_FLAGS
 #define CPPHTTPLIB_SEND_FLAGS 0
-#endif
 
-#ifndef CPPHTTPLIB_LISTEN_BACKLOG
 #define CPPHTTPLIB_LISTEN_BACKLOG 128
-#endif
 
-#ifndef CPPHTTPLIB_MAX_LINE_LENGTH
 #define CPPHTTPLIB_MAX_LINE_LENGTH 32768
-#endif
-
-#ifndef CPPHTTPLIB_WEBSOCKET_MAX_PAYLOAD_LENGTH
-#define CPPHTTPLIB_WEBSOCKET_MAX_PAYLOAD_LENGTH 16777216
-#endif
-
-#ifndef CPPHTTPLIB_WEBSOCKET_READ_TIMEOUT_SECOND
-#define CPPHTTPLIB_WEBSOCKET_READ_TIMEOUT_SECOND 300
-#endif
-
-#ifndef CPPHTTPLIB_WEBSOCKET_CLOSE_TIMEOUT_SECOND
-#define CPPHTTPLIB_WEBSOCKET_CLOSE_TIMEOUT_SECOND 5
-#endif
-
-#ifndef CPPHTTPLIB_WEBSOCKET_PING_INTERVAL_SECOND
-#define CPPHTTPLIB_WEBSOCKET_PING_INTERVAL_SECOND 30
-#endif
-
-#ifndef CPPHTTPLIB_WEBSOCKET_MAX_MISSED_PONGS
-#define CPPHTTPLIB_WEBSOCKET_MAX_MISSED_PONGS 0
-#endif
 
 /*
  * Headers
@@ -231,8 +104,6 @@
 #if _MSC_VER < 1900
 #error Sorry, Visual Studio versions prior to 2015 are not supported
 #endif
-
-#pragma comment(lib, "ws2_32.lib")
 
 #ifndef _SSIZE_T_DEFINED
 using ssize_t = __int64;
@@ -254,7 +125,6 @@ using ssize_t = __int64;
 
 #include <io.h>
 #include <winsock2.h>
-#include <ws2tcpip.h>
 
 #if defined(__has_include)
 #if __has_include(<afunix.h>)
@@ -531,11 +401,6 @@ using socket_t = int;
  * Declaration
  */
 namespace httplib {
-
-  namespace ws {
-    class WebSocket;
-  } // namespace ws
-
   namespace detail {
 
     /*
@@ -1821,7 +1686,6 @@ namespace httplib {
     HTTPParsing,
     InvalidRangeHeader,
     UnsupportedContentEncoding,
-    WebSocketHandshake,
 
     // For internal use only
     SSLPeerCouldBeClosed_,
@@ -2080,8 +1944,6 @@ namespace httplib {
 
     using StartHandler = std::function<void()>;
 
-    using WebSocketHandler =
-      std::function<void(const Request &, ws::WebSocket &)>;
     using SubProtocolSelector =
       std::function<std::string(const std::vector<std::string> &protocols)>;
 
@@ -2101,10 +1963,6 @@ namespace httplib {
     Server &Delete(const std::string &pattern, Handler handler);
     Server &Delete(const std::string &pattern, HandlerWithContentReader handler);
     Server &Options(const std::string &pattern, Handler handler);
-
-    Server &WebSocket(const std::string &pattern, WebSocketHandler handler);
-    Server &WebSocket(const std::string &pattern, WebSocketHandler handler,
-      SubProtocolSelector sub_protocol_selector);
 
     bool set_base_dir(const std::string &dir,
       const std::string &mount_point = std::string());
@@ -2169,13 +2027,6 @@ namespace httplib {
 
     Server &set_payload_max_length(size_t length);
 
-    Server &set_websocket_ping_interval(time_t sec);
-    template <class Rep, class Period>
-    Server &set_websocket_ping_interval(
-      const std::chrono::duration<Rep, Period> &duration);
-
-    Server &set_websocket_max_missed_pongs(int count);
-
     bool bind_to_port(const std::string &host, int port, int socket_flags = 0);
     int bind_to_any_port(const std::string &host, int socket_flags = 0);
     bool listen_after_bind();
@@ -2194,8 +2045,7 @@ namespace httplib {
       int remote_port, const std::string &local_addr,
       int local_port, bool close_connection,
       bool &connection_closed,
-      const std::function<void(Request &)> &setup_request,
-      bool *websocket_upgraded = nullptr);
+      const std::function<void(Request &)> &setup_request);
 
     std::atomic<socket_t> svr_sock_{INVALID_SOCKET};
 
@@ -2210,9 +2060,6 @@ namespace httplib {
     time_t idle_interval_sec_ = CPPHTTPLIB_IDLE_INTERVAL_SECOND;
     time_t idle_interval_usec_ = CPPHTTPLIB_IDLE_INTERVAL_USECOND;
     size_t payload_max_length_ = CPPHTTPLIB_PAYLOAD_MAX_LENGTH;
-    time_t websocket_ping_interval_sec_ =
-      CPPHTTPLIB_WEBSOCKET_PING_INTERVAL_SECOND;
-    int websocket_max_missed_pongs_ = CPPHTTPLIB_WEBSOCKET_MAX_MISSED_PONGS;
 
   private:
     using Handlers =
@@ -2308,14 +2155,6 @@ namespace httplib {
     Handlers delete_handlers_;
     HandlersForContentReader delete_handlers_for_content_reader_;
     Handlers options_handlers_;
-
-    struct WebSocketHandlerEntry {
-      std::unique_ptr<detail::MatcherBase> matcher;
-      WebSocketHandler handler;
-      SubProtocolSelector sub_protocol_selector;
-    };
-    using WebSocketHandlers = std::vector<WebSocketHandlerEntry>;
-    WebSocketHandlers websocket_handlers_;
 
     HandlerWithResponse error_handler_;
     ExceptionHandler exception_handler_;
@@ -4195,275 +4034,6 @@ namespace httplib {
 
   } // namespace sse
 
-  namespace ws {
-
-    enum class Opcode : uint8_t {
-      Continuation = 0x0,
-      Text = 0x1,
-      Binary = 0x2,
-      Close = 0x8,
-      Ping = 0x9,
-      Pong = 0xA,
-    };
-
-    enum class CloseStatus : uint16_t {
-      Normal = 1000,
-      GoingAway = 1001,
-      ProtocolError = 1002,
-      UnsupportedData = 1003,
-      NoStatus = 1005,
-      Abnormal = 1006,
-      InvalidPayload = 1007,
-      PolicyViolation = 1008,
-      MessageTooBig = 1009,
-      MandatoryExtension = 1010,
-      InternalError = 1011,
-    };
-
-    enum ReadResult : int { Fail = 0, Text = 1, Binary = 2 };
-
-    // Result of WebSocketClient::connect(). Truthy only when the WebSocket
-    // upgrade handshake fully succeeded. On failure error() identifies the
-    // failing layer; status()/headers() expose the server's upgrade response
-    // when one was received (status() is -1 otherwise).
-    class Result {
-    public:
-      Result() = default;
-      Result(Error err, int status, Headers &&headers)
-        : err_(err), status_(status), headers_(std::move(headers)) {}
-
-      explicit operator bool() const { return err_ == Error::Success; }
-      Error error() const { return err_; }
-
-      // Upgrade response info
-      int status() const { return status_; }
-      const Headers &headers() const { return headers_; }
-      std::string get_header_value(const std::string &key,
-        const char *def = "") const {
-        return detail::get_header_value(headers_, key, def, 0);
-      }
-      bool has_header(const std::string &key) const {
-        return headers_.find(key) != headers_.end();
-      }
-
-#ifdef CPPHTTPLIB_SSL_ENABLED
-      Result(Error err, int status, Headers &&headers, int ssl_error,
-        uint64_t ssl_backend_error)
-        : err_(err), status_(status), headers_(std::move(headers)),
-        ssl_error_(ssl_error), ssl_backend_error_(ssl_backend_error) {
-      }
-
-      int ssl_error() const { return ssl_error_; }
-      uint64_t ssl_backend_error() const { return ssl_backend_error_; }
-#endif
-
-    private:
-      Error err_ = Error::Unknown; // a default-constructed Result is falsy
-      int status_ = -1;
-      Headers headers_;
-#ifdef CPPHTTPLIB_SSL_ENABLED
-      int ssl_error_ = 0;
-      uint64_t ssl_backend_error_ = 0;
-#endif
-    };
-
-    class WebSocket {
-    public:
-      WebSocket(const WebSocket &) = delete;
-      WebSocket &operator=(const WebSocket &) = delete;
-      ~WebSocket();
-
-      ReadResult read(std::string &msg);
-      bool send(const std::string &data);
-      bool send(const char *data, size_t len);
-      void close(CloseStatus status = CloseStatus::Normal,
-        const std::string &reason = "");
-      const Request &request() const;
-      bool is_open() const;
-
-    private:
-      friend class httplib::Server;
-      friend class WebSocketClient;
-
-      WebSocket(
-        Stream &strm, const Request &req, bool is_server,
-        time_t ping_interval_sec = CPPHTTPLIB_WEBSOCKET_PING_INTERVAL_SECOND,
-        int max_missed_pongs = CPPHTTPLIB_WEBSOCKET_MAX_MISSED_PONGS)
-        : strm_(strm), req_(req), is_server_(is_server),
-        ping_interval_sec_(ping_interval_sec),
-        max_missed_pongs_(max_missed_pongs) {
-        start_heartbeat();
-      }
-
-      WebSocket(
-        std::unique_ptr<Stream> &&owned_strm, const Request &req, bool is_server,
-        time_t ping_interval_sec = CPPHTTPLIB_WEBSOCKET_PING_INTERVAL_SECOND,
-        int max_missed_pongs = CPPHTTPLIB_WEBSOCKET_MAX_MISSED_PONGS)
-        : strm_(*owned_strm), owned_strm_(std::move(owned_strm)), req_(req),
-        is_server_(is_server), ping_interval_sec_(ping_interval_sec),
-        max_missed_pongs_(max_missed_pongs) {
-        start_heartbeat();
-      }
-
-      void start_heartbeat();
-      bool send_frame(Opcode op, const char *data, size_t len, bool fin = true);
-
-      Stream &strm_;
-      std::unique_ptr<Stream> owned_strm_;
-      Request req_;
-      bool is_server_;
-      time_t ping_interval_sec_;
-      int max_missed_pongs_;
-      int unacked_pings_ = 0;
-      std::atomic<bool> closed_{false};
-      std::mutex write_mutex_;
-      std::thread ping_thread_;
-      std::mutex ping_mutex_;
-      std::condition_variable ping_cv_;
-    };
-
-    class WebSocketClient {
-    public:
-      explicit WebSocketClient(const std::string &scheme_host_port_path,
-        const Headers &headers = {});
-
-      ~WebSocketClient();
-      WebSocketClient(const WebSocketClient &) = delete;
-      WebSocketClient &operator=(const WebSocketClient &) = delete;
-
-      bool is_valid() const;
-
-      Result connect();
-      ReadResult read(std::string &msg);
-      bool send(const std::string &data);
-      bool send(const char *data, size_t len);
-      void close(CloseStatus status = CloseStatus::Normal,
-        const std::string &reason = "");
-      bool is_open() const;
-      const std::string &subprotocol() const;
-      void set_read_timeout(time_t sec, time_t usec = 0);
-      template <class Rep, class Period>
-      void set_read_timeout(const std::chrono::duration<Rep, Period> &duration);
-
-      void set_write_timeout(time_t sec, time_t usec = 0);
-      template <class Rep, class Period>
-      void set_write_timeout(const std::chrono::duration<Rep, Period> &duration);
-
-      void set_websocket_ping_interval(time_t sec);
-      void set_websocket_max_missed_pongs(int count);
-      void set_tcp_nodelay(bool on);
-      void set_address_family(int family);
-      void set_ipv6_v6only(bool on);
-      void set_socket_options(SocketOptions socket_options);
-
-      void set_connection_timeout(time_t sec, time_t usec = 0);
-      template <class Rep, class Period>
-      void
-        set_connection_timeout(const std::chrono::duration<Rep, Period> &duration);
-
-      void set_interface(const std::string &intf);
-      void set_hostname_addr_map(std::map<std::string, std::string> addr_map);
-
-#ifdef CPPHTTPLIB_SSL_ENABLED
-      struct PemMemory {
-        const char *cert_pem;
-        size_t cert_pem_len;
-        const char *key_pem;
-        size_t key_pem_len;
-        const char *private_key_password;
-      };
-      explicit WebSocketClient(const std::string &scheme_host_port_path,
-        const PemMemory &pem, const Headers &headers = {});
-
-      void set_ca_cert_path(const std::string &ca_cert_file_path,
-        const std::string &ca_cert_dir_path = std::string());
-      void set_ca_cert_store(tls::ca_store_t store);
-      void load_ca_cert_store(const char *ca_cert, std::size_t size);
-      void enable_server_certificate_verification(bool enabled);
-      void enable_server_hostname_verification(bool enabled);
-      void enable_system_ca(bool enabled);
-#endif
-
-    private:
-      void shutdown_and_close();
-      bool create_stream(std::unique_ptr<Stream> &strm, Error &error,
-        int &ssl_error, uint64_t &ssl_backend_error);
-      void prepare_default_headers(Request &req);
-
-      std::string host_;
-      int port_;
-      std::string path_;
-      Headers headers_;
-      std::string subprotocol_;
-      bool is_valid_ = false;
-      socket_t sock_ = INVALID_SOCKET;
-      std::unique_ptr<WebSocket> ws_;
-      time_t read_timeout_sec_ = CPPHTTPLIB_WEBSOCKET_READ_TIMEOUT_SECOND;
-      time_t read_timeout_usec_ = 0;
-      time_t write_timeout_sec_ = CPPHTTPLIB_CLIENT_WRITE_TIMEOUT_SECOND;
-      time_t write_timeout_usec_ = CPPHTTPLIB_CLIENT_WRITE_TIMEOUT_USECOND;
-      time_t websocket_ping_interval_sec_ =
-        CPPHTTPLIB_WEBSOCKET_PING_INTERVAL_SECOND;
-      int websocket_max_missed_pongs_ = CPPHTTPLIB_WEBSOCKET_MAX_MISSED_PONGS;
-      int address_family_ = AF_UNSPEC;
-      bool tcp_nodelay_ = CPPHTTPLIB_TCP_NODELAY;
-      bool ipv6_v6only_ = CPPHTTPLIB_IPV6_V6ONLY;
-      SocketOptions socket_options_ = nullptr;
-      time_t connection_timeout_sec_ = CPPHTTPLIB_CONNECTION_TIMEOUT_SECOND;
-      time_t connection_timeout_usec_ = CPPHTTPLIB_CONNECTION_TIMEOUT_USECOND;
-      std::string interface_;
-
-      // Hostname to connection target map. The value is an IP literal or another
-      // hostname; only the connection target changes, never the identity.
-      std::map<std::string, std::string> addr_map_;
-
-#ifdef CPPHTTPLIB_SSL_ENABLED
-      bool is_ssl_ = false;
-      tls::ctx_t tls_ctx_ = nullptr;
-      tls::session_t tls_session_ = nullptr;
-      std::string ca_cert_file_path_;
-      std::string ca_cert_dir_path_;
-      bool custom_ca_loaded_ = false;
-      bool certs_loaded_ = false;
-      SystemCAMode system_ca_mode_ = SystemCAMode::Auto;
-      bool server_certificate_verification_ = true;
-      bool server_hostname_verification_ = true;
-#endif
-    };
-
-    template <class Rep, class Period>
-    inline void WebSocketClient::set_read_timeout(
-      const std::chrono::duration<Rep, Period> &duration) {
-      detail::duration_to_sec_and_usec(
-        duration, [&](time_t sec, time_t usec) { set_read_timeout(sec, usec); });
-    }
-
-    template <class Rep, class Period>
-    inline void WebSocketClient::set_write_timeout(
-      const std::chrono::duration<Rep, Period> &duration) {
-      detail::duration_to_sec_and_usec(
-        duration, [&](time_t sec, time_t usec) { set_write_timeout(sec, usec); });
-    }
-
-    template <class Rep, class Period>
-    inline void WebSocketClient::set_connection_timeout(
-      const std::chrono::duration<Rep, Period> &duration) {
-      detail::duration_to_sec_and_usec(duration, [&](time_t sec, time_t usec) {
-        set_connection_timeout(sec, usec);
-        });
-    }
-
-    namespace impl {
-
-      bool is_valid_utf8(const std::string &s);
-
-      bool read_websocket_frame(Stream &strm, Opcode &opcode, std::string &payload,
-        bool &fin, bool expect_masked, size_t max_len);
-
-    } // namespace impl
-
-  } // namespace ws
-
   // ----------------------------------------------------------------------------
 
   /*
@@ -5101,56 +4671,6 @@ namespace httplib {
       return 0;
     }
 
-  } // namespace detail
-
-  namespace ws {
-    namespace impl {
-
-      inline bool is_valid_utf8(const std::string &s) {
-        size_t i = 0;
-        auto n = s.size();
-        while (i < n) {
-          auto c = static_cast<unsigned char>(s[i]);
-          size_t len;
-          uint32_t cp;
-          if (c < 0x80) {
-            i++;
-            continue;
-          } else if ((c & 0xE0) == 0xC0) {
-            len = 2;
-            cp = c & 0x1F;
-          } else if ((c & 0xF0) == 0xE0) {
-            len = 3;
-            cp = c & 0x0F;
-          } else if ((c & 0xF8) == 0xF0) {
-            len = 4;
-            cp = c & 0x07;
-          } else {
-            return false;
-          }
-          if (i + len > n) { return false; }
-          for (size_t j = 1; j < len; j++) {
-            auto b = static_cast<unsigned char>(s[i + j]);
-            if ((b & 0xC0) != 0x80) { return false; }
-            cp = (cp << 6) | (b & 0x3F);
-          }
-          // Overlong encoding check
-          if (len == 2 && cp < 0x80) { return false; }
-          if (len == 3 && cp < 0x800) { return false; }
-          if (len == 4 && cp < 0x10000) { return false; }
-          // Surrogate halves (U+D800..U+DFFF) and beyond U+10FFFF are invalid
-          if (cp >= 0xD800 && cp <= 0xDFFF) { return false; }
-          if (cp > 0x10FFFF) { return false; }
-          i += len;
-        }
-        return true;
-      }
-
-    } // namespace impl
-  } // namespace ws
-
-  namespace detail {
-
     // NOTE: This code came up with the following stackoverflow post:
     // https://stackoverflow.com/questions/180947/base64-decode-snippet-in-c
     inline std::string base64_encode(const std::string &in) {
@@ -5274,188 +4794,6 @@ namespace httplib {
       }
       return hash;
     }
-
-    inline std::string websocket_accept_key(const std::string &client_key) {
-      const std::string magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-      return base64_encode(sha1(client_key + magic));
-    }
-
-    inline bool is_websocket_upgrade(const Request &req) {
-      if (req.method != "GET") { return false; }
-
-      // Check Upgrade: websocket (case-insensitive)
-      auto upgrade_it = req.headers.find("Upgrade");
-      if (upgrade_it == req.headers.end()) { return false; }
-      auto upgrade_val = case_ignore::to_lower(upgrade_it->second);
-      if (upgrade_val != "websocket") { return false; }
-
-      // Check Connection header contains "Upgrade"
-      auto connection_it = req.headers.find("Connection");
-      if (connection_it == req.headers.end()) { return false; }
-      auto connection_val = case_ignore::to_lower(connection_it->second);
-      if (connection_val.find("upgrade") == std::string::npos) { return false; }
-
-      // Check Sec-WebSocket-Key is a valid base64-encoded 16-byte value (24 chars)
-      // RFC 6455 Section 4.2.1
-      auto ws_key = req.get_header_value("Sec-WebSocket-Key");
-      if (ws_key.size() != 24 || ws_key[22] != '=' || ws_key[23] != '=') {
-        return false;
-      }
-      static const std::string b64chars =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-      for (size_t i = 0; i < 22; i++) {
-        if (b64chars.find(ws_key[i]) == std::string::npos) { return false; }
-      }
-
-      // Check Sec-WebSocket-Version: 13
-      auto version = req.get_header_value("Sec-WebSocket-Version");
-      if (version != "13") { return false; }
-
-      return true;
-    }
-
-    inline bool write_websocket_frame(Stream &strm, ws::Opcode opcode,
-      const char *data, size_t len, bool fin,
-      bool mask) {
-      // First byte: FIN + opcode
-      uint8_t header[2];
-      header[0] = static_cast<uint8_t>((fin ? 0x80 : 0x00) |
-        (static_cast<uint8_t>(opcode) & 0x0F));
-
-      // Second byte: MASK + payload length
-      if (len < 126) {
-        header[1] = static_cast<uint8_t>(len);
-        if (mask) { header[1] |= 0x80; }
-        if (strm.write(reinterpret_cast<char *>(header), 2) < 0) { return false; }
-      } else if (len <= 0xFFFF) {
-        header[1] = 126;
-        if (mask) { header[1] |= 0x80; }
-        if (strm.write(reinterpret_cast<char *>(header), 2) < 0) { return false; }
-        uint8_t ext[2];
-        ext[0] = static_cast<uint8_t>((len >> 8) & 0xFF);
-        ext[1] = static_cast<uint8_t>(len & 0xFF);
-        if (strm.write(reinterpret_cast<char *>(ext), 2) < 0) { return false; }
-      } else {
-        header[1] = 127;
-        if (mask) { header[1] |= 0x80; }
-        if (strm.write(reinterpret_cast<char *>(header), 2) < 0) { return false; }
-        uint8_t ext[8];
-        for (int i = 7; i >= 0; i--) {
-          ext[7 - i] =
-            static_cast<uint8_t>((static_cast<uint64_t>(len) >> (i * 8)) & 0xFF);
-        }
-        if (strm.write(reinterpret_cast<char *>(ext), 8) < 0) { return false; }
-      }
-
-      if (mask) {
-        // Generate random mask key
-        thread_local std::mt19937 rng(std::random_device{}());
-        uint8_t mask_key[4];
-        auto r = rng();
-        std::memcpy(mask_key, &r, 4);
-        if (strm.write(reinterpret_cast<char *>(mask_key), 4) < 0) { return false; }
-
-        // Write masked payload in chunks
-        const size_t chunk_size = 4096;
-        std::vector<char> buf((std::min)(len, chunk_size));
-        for (size_t offset = 0; offset < len; offset += chunk_size) {
-          size_t n = (std::min)(chunk_size, len - offset);
-          for (size_t i = 0; i < n; i++) {
-            buf[i] =
-              data[offset + i] ^ static_cast<char>(mask_key[(offset + i) % 4]);
-          }
-          if (strm.write(buf.data(), n) < 0) { return false; }
-        }
-      } else {
-        if (len > 0) {
-          if (strm.write(data, len) < 0) { return false; }
-        }
-      }
-
-      return true;
-    }
-
-  } // namespace detail
-
-  namespace ws {
-    namespace impl {
-
-      inline bool read_websocket_frame(Stream &strm, Opcode &opcode,
-        std::string &payload, bool &fin,
-        bool expect_masked, size_t max_len) {
-        // Read first 2 bytes
-        uint8_t header[2];
-        if (strm.read(reinterpret_cast<char *>(header), 2) != 2) { return false; }
-
-        fin = (header[0] & 0x80) != 0;
-
-        // RSV1, RSV2, RSV3 must be 0 when no extension is negotiated
-        if (header[0] & 0x70) { return false; }
-
-        opcode = static_cast<Opcode>(header[0] & 0x0F);
-        bool masked = (header[1] & 0x80) != 0;
-        uint64_t payload_len = header[1] & 0x7F;
-
-        // RFC 6455 Section 5.5: control frames MUST NOT be fragmented and
-        // MUST have a payload length of 125 bytes or less
-        bool is_control = (static_cast<uint8_t>(opcode) & 0x08) != 0;
-        if (is_control) {
-          if (!fin) { return false; }
-          if (payload_len > 125) { return false; }
-        }
-
-        if (masked != expect_masked) { return false; }
-
-        // Extended payload length
-        if (payload_len == 126) {
-          uint8_t ext[2];
-          if (strm.read(reinterpret_cast<char *>(ext), 2) != 2) { return false; }
-          payload_len = (static_cast<uint64_t>(ext[0]) << 8) | ext[1];
-        } else if (payload_len == 127) {
-          uint8_t ext[8];
-          if (strm.read(reinterpret_cast<char *>(ext), 8) != 8) { return false; }
-          // RFC 6455 Section 5.2: the most significant bit MUST be 0
-          if (ext[0] & 0x80) { return false; }
-          payload_len = 0;
-          for (int i = 0; i < 8; i++) {
-            payload_len = (payload_len << 8) | ext[i];
-          }
-        }
-
-        if (payload_len > max_len) { return false; }
-
-        // Read mask key if present
-        uint8_t mask_key[4] = {0};
-        if (masked) {
-          if (strm.read(reinterpret_cast<char *>(mask_key), 4) != 4) { return false; }
-        }
-
-        // Read payload
-        payload.resize(static_cast<size_t>(payload_len));
-        if (payload_len > 0) {
-          size_t total_read = 0;
-          while (total_read < payload_len) {
-            auto n = strm.read(&payload[total_read],
-              static_cast<size_t>(payload_len - total_read));
-            if (n <= 0) { return false; }
-            total_read += static_cast<size_t>(n);
-          }
-        }
-
-        // Unmask if needed
-        if (masked) {
-          for (size_t i = 0; i < payload.size(); i++) {
-            payload[i] ^= static_cast<char>(mask_key[i % 4]);
-          }
-        }
-
-        return true;
-      }
-
-    } // namespace impl
-  } // namespace ws
-
-  namespace detail {
 
     inline bool is_valid_path(const std::string &path) {
       size_t level = 0;
@@ -7835,82 +7173,6 @@ namespace httplib {
       return true;
     }
 
-    // Everything WebSocketClient::connect() reports about the upgrade exchange.
-    // status stays -1 until a status line is parsed, mirroring stream::Result.
-    struct WebSocketUpgradeResponse {
-      Error error = Error::Success;
-      int status = -1;
-      Headers headers;
-      std::string selected_subprotocol;
-    };
-
-    inline bool read_websocket_upgrade_response(Stream &strm,
-      const std::string &expected_accept,
-      WebSocketUpgradeResponse &upgrade) {
-      // Read status line
-      const auto bufsiz = 2048;
-      char buf[bufsiz];
-      stream_line_reader line_reader(strm, buf, bufsiz);
-      if (!line_reader.getline()) {
-        upgrade.error = Error::Read;
-        return false;
-      }
-
-      std::string version;
-      std::string reason;
-      if (!parse_status_line(line_reader.ptr(), version, upgrade.status, reason)) {
-        upgrade.error = Error::WebSocketHandshake;
-        return false;
-      }
-
-      // Read the headers even for a rejection so the caller can see why the
-      // server refused the upgrade. A non-101 response may carry a body; it is
-      // deliberately left unread since the caller closes the socket right away.
-      if (!read_headers(strm, upgrade.headers)) {
-        upgrade.error = Error::Read;
-        return false;
-      }
-
-      const auto &headers = upgrade.headers;
-
-      if (upgrade.status != StatusCode::SwitchingProtocol_101) {
-        upgrade.error = Error::WebSocketHandshake;
-        return false;
-      }
-
-      // Verify Upgrade: websocket (case-insensitive)
-      auto upgrade_it = headers.find("Upgrade");
-      if (upgrade_it == headers.end() ||
-        case_ignore::to_lower(upgrade_it->second) != "websocket") {
-        upgrade.error = Error::WebSocketHandshake;
-        return false;
-      }
-
-      // Verify Connection header contains "Upgrade" (case-insensitive)
-      auto connection_it = headers.find("Connection");
-      if (connection_it == headers.end() ||
-        case_ignore::to_lower(connection_it->second).find("upgrade") ==
-        std::string::npos) {
-        upgrade.error = Error::WebSocketHandshake;
-        return false;
-      }
-
-      // Verify Sec-WebSocket-Accept header value
-      auto it = headers.find("Sec-WebSocket-Accept");
-      if (it == headers.end() || it->second != expected_accept) {
-        upgrade.error = Error::WebSocketHandshake;
-        return false;
-      }
-
-      // Extract negotiated subprotocol
-      auto proto_it = headers.find("Sec-WebSocket-Protocol");
-      if (proto_it != headers.end()) {
-        upgrade.selected_subprotocol = proto_it->second;
-      }
-
-      return true;
-    }
-
     enum class ReadContentResult {
       Success,         // Successfully read the content
       PayloadTooLarge, // The content exceeds the specified payload limit
@@ -9656,53 +8918,6 @@ namespace httplib {
 
     } // namespace fields
 
-    inline bool perform_websocket_handshake(Stream &strm, Request &req,
-      WebSocketUpgradeResponse &upgrade) {
-      // Generate random Sec-WebSocket-Key
-      thread_local std::mt19937 rng(std::random_device{}());
-      std::string key_bytes(16, '\0');
-      for (size_t i = 0; i < 16; i += 4) {
-        auto r = rng();
-        std::memcpy(&key_bytes[i], &r, (std::min)(size_t(4), size_t(16 - i)));
-      }
-      auto client_key = base64_encode(key_bytes);
-
-      req.headers.erase("Upgrade");
-      req.headers.erase("Connection");
-      req.headers.erase("Sec-WebSocket-Key");
-      req.headers.erase("Sec-WebSocket-Version");
-      req.headers.emplace("Upgrade", "websocket");
-      req.headers.emplace("Connection", "Upgrade");
-      req.headers.emplace("Sec-WebSocket-Key", client_key);
-      req.headers.emplace("Sec-WebSocket-Version", "13");
-
-      // Build the request in memory first, like ClientImpl::write_request does.
-      // Writing straight to the socket would leak a request line onto the wire
-      // before check_and_write_headers gets a chance to reject an invalid header,
-      // and would emit one small write per header.
-      BufferStream bstrm;
-
-      if (write_request_line(bstrm, req.method, req.path) < 0) {
-        upgrade.error = Error::Write;
-        return false;
-      }
-
-      auto error = Error::Success;
-      if (!check_and_write_headers(bstrm, req.headers, write_headers, error)) {
-        upgrade.error = error;
-        return false;
-      }
-
-      const auto &data = bstrm.get_buffer();
-      if (!write_data(strm, data.data(), data.size())) {
-        upgrade.error = Error::Write;
-        return false;
-      }
-
-      // Verify 101 response and Sec-WebSocket-Accept header
-      auto expected_accept = websocket_accept_key(client_key);
-      return read_websocket_upgrade_response(strm, expected_accept, upgrade);
-    }
 
     inline bool is_ip_address(const std::string &host) {
       struct in_addr addr4;
@@ -10485,7 +9700,6 @@ namespace httplib {
       case Error::HTTPParsing: return "HTTP parsing failed";
       case Error::InvalidRangeHeader: return "Invalid Range header";
       case Error::UnsupportedContentEncoding: return "Unsupported Content-Encoding";
-      case Error::WebSocketHandshake: return "WebSocket handshake failed";
       default: break;
     }
 
@@ -11661,11 +10875,6 @@ namespace httplib {
 
     inline bool RegexMatcher::match(Request &request) const {
       request.path_params.clear();
-      // See CPPHTTPLIB_REGEX_ROUTE_PATH_MAX_LENGTH: an overlong path is treated as
-      // a non-match rather than risking a stack overflow in std::regex_match.
-      if (request.path.length() > CPPHTTPLIB_REGEX_ROUTE_PATH_MAX_LENGTH) {
-        return false;
-      }
       return std::regex_match(request.path, request.matches, regex_);
     }
 
@@ -11714,8 +10923,7 @@ namespace httplib {
     inline void add_default_user_agent_header(Request &req) {
 #ifndef CPPHTTPLIB_NO_DEFAULT_USER_AGENT
       if (!req.has_header("User-Agent")) {
-        req.set_header("User-Agent",
-          std::string("cpp-httplib/") + CPPHTTPLIB_VERSION);
+        req.set_header("User-Agent", std::string("cpp-httplib"));
       }
 #else
       (void)req;
@@ -12156,21 +11364,6 @@ namespace httplib {
     return add_handler(options_handlers_, pattern, std::move(handler));
   }
 
-  inline Server &Server::WebSocket(const std::string & pattern,
-    WebSocketHandler handler) {
-    websocket_handlers_.push_back(
-      {make_matcher(pattern), std::move(handler), nullptr});
-    return *this;
-  }
-
-  inline Server &Server::WebSocket(const std::string & pattern,
-    WebSocketHandler handler,
-    SubProtocolSelector sub_protocol_selector) {
-    websocket_handlers_.push_back({make_matcher(pattern), std::move(handler),
-                                   std::move(sub_protocol_selector)});
-    return *this;
-  }
-
   inline bool Server::set_base_dir(const std::string & dir,
     const std::string & mount_point) {
     return set_mount_point(mount_point, dir);
@@ -12364,25 +11557,6 @@ namespace httplib {
 
   inline Server &Server::set_payload_max_length(size_t length) {
     payload_max_length_ = length;
-    return *this;
-  }
-
-  inline Server &Server::set_websocket_max_missed_pongs(int count) {
-    websocket_max_missed_pongs_ = count;
-    return *this;
-  }
-
-  inline Server &Server::set_websocket_ping_interval(time_t sec) {
-    websocket_ping_interval_sec_ = sec;
-    return *this;
-  }
-
-  template <class Rep, class Period>
-  inline Server &Server::set_websocket_ping_interval(
-    const std::chrono::duration<Rep, Period> &duration) {
-    detail::duration_to_sec_and_usec(duration, [&](time_t sec, time_t /*usec*/) {
-      set_websocket_ping_interval(sec);
-      });
     return *this;
   }
 
@@ -13359,8 +12533,7 @@ namespace httplib {
       int remote_port, const std::string & local_addr,
       int local_port, bool close_connection,
       bool &connection_closed,
-      const std::function<void(Request &)> &setup_request,
-      bool *websocket_upgraded) {
+      const std::function<void(Request &)> &setup_request) {
     std::array<char, 2048> buf{};
 
     detail::stream_line_reader line_reader(strm, buf.data(), buf.size());
@@ -13490,77 +12663,6 @@ namespace httplib {
       return !detail::is_socket_alive(sock);
       };
 
-    // WebSocket upgrade
-    // Check pre_routing_handler_ before upgrading so that authentication
-    // and other middleware can reject the request with an HTTP response
-    // (e.g., 401) before the protocol switches.
-    if (detail::is_websocket_upgrade(req)) {
-      if (pre_routing_handler_ &&
-        pre_routing_handler_(req, res) == HandlerResponse::Handled) {
-        if (res.status == -1) { res.status = StatusCode::OK_200; }
-        return write_response(strm, close_connection, req, res);
-      }
-      // Find matching WebSocket handler
-      for (const auto &entry : websocket_handlers_) {
-        if (entry.matcher->match(req)) {
-          // Compute accept key
-          auto client_key = req.get_header_value("Sec-WebSocket-Key");
-          auto accept_key = detail::websocket_accept_key(client_key);
-
-          // Negotiate subprotocol
-          std::string selected_subprotocol;
-          if (entry.sub_protocol_selector) {
-            auto protocol_header = req.get_header_value("Sec-WebSocket-Protocol");
-            if (!protocol_header.empty()) {
-              std::vector<std::string> protocols;
-              std::istringstream iss(protocol_header);
-              std::string token;
-              while (std::getline(iss, token, ',')) {
-                // Trim whitespace
-                auto start = token.find_first_not_of(' ');
-                auto end = token.find_last_not_of(' ');
-                if (start != std::string::npos) {
-                  protocols.push_back(token.substr(start, end - start + 1));
-                }
-              }
-              selected_subprotocol = entry.sub_protocol_selector(protocols);
-            }
-          }
-
-          // Send 101 Switching Protocols
-          std::string handshake_response = "HTTP/1.1 101 Switching Protocols\r\n"
-            "Upgrade: websocket\r\n"
-            "Connection: Upgrade\r\n"
-            "Sec-WebSocket-Accept: " +
-            accept_key + "\r\n";
-          if (!selected_subprotocol.empty()) {
-            if (!detail::fields::is_field_value(selected_subprotocol)) {
-              return false;
-            }
-            handshake_response +=
-              "Sec-WebSocket-Protocol: " + selected_subprotocol + "\r\n";
-          }
-          handshake_response += "\r\n";
-          if (strm.write(handshake_response.data(), handshake_response.size()) <
-            0) {
-            return false;
-          }
-
-          connection_closed = true;
-          if (websocket_upgraded) { *websocket_upgraded = true; }
-
-          {
-            // Use WebSocket-specific read timeout instead of HTTP timeout
-            strm.set_read_timeout(CPPHTTPLIB_WEBSOCKET_READ_TIMEOUT_SECOND, 0);
-            ws::WebSocket ws(strm, req, true, websocket_ping_interval_sec_,
-              websocket_max_missed_pongs_);
-            entry.handler(req, ws);
-          }
-          return true;
-        }
-      }
-      // No matching handler - fall through to 404
-    }
 
     // Routing
     auto routed = false;
@@ -13670,7 +12772,6 @@ namespace httplib {
     int local_port = 0;
     detail::get_local_ip_and_port(sock, local_addr, local_port);
 
-    bool websocket_upgraded = false;
     auto ret = detail::process_server_socket(
       svr_sock_, sock, keep_alive_max_count_, keep_alive_timeout_sec_,
       read_timeout_sec_, read_timeout_usec_, write_timeout_sec_,
@@ -13678,7 +12779,7 @@ namespace httplib {
       [&](Stream &strm, bool close_connection, bool &connection_closed) {
         return process_request(strm, remote_addr, remote_port, local_addr,
           local_port, close_connection, connection_closed,
-          nullptr, &websocket_upgraded);
+          nullptr);
       });
 
     detail::drain_and_close_socket(sock);
@@ -17022,9 +16123,8 @@ namespace httplib {
     // Use scope_exit to ensure cleanup on all paths (including exceptions)
     bool handshake_done = false;
     bool ret = false;
-    bool websocket_upgraded = false;
     auto cleanup = detail::scope_exit([&] {
-      if (handshake_done) { shutdown(session, !websocket_upgraded && ret); }
+      if (handshake_done) { shutdown(session, ret); }
       free_session(session);
       detail::shutdown_socket(sock);
       detail::close_socket(sock);
@@ -17067,7 +16167,7 @@ namespace httplib {
         return process_request(
           strm, remote_addr, remote_port, local_addr, local_port,
           close_connection, connection_closed,
-          [&](Request &req) { req.ssl = session; }, &websocket_upgraded);
+          [&](Request &req) { req.ssl = session; });
       });
 
     return ret;
@@ -21330,521 +20430,7 @@ namespace httplib {
 
 #endif // CPPHTTPLIB_WOLFSSL_SUPPORT
 
-// WebSocket implementation
-  namespace ws {
-
-    inline bool WebSocket::send_frame(Opcode op, const char *data, size_t len,
-      bool fin) {
-      std::lock_guard<std::mutex> lock(write_mutex_);
-      if (closed_) { return false; }
-      return detail::write_websocket_frame(strm_, op, data, len, fin, !is_server_);
-    }
-
-    inline ReadResult WebSocket::read(std::string &msg) {
-      while (!closed_) {
-        Opcode opcode;
-        std::string payload;
-        bool fin;
-
-        if (!impl::read_websocket_frame(strm_, opcode, payload, fin, is_server_,
-          CPPHTTPLIB_WEBSOCKET_MAX_PAYLOAD_LENGTH)) {
-          closed_ = true;
-          return Fail;
-        }
-
-        switch (opcode) {
-          case Opcode::Ping: {
-            std::lock_guard<std::mutex> lock(write_mutex_);
-            detail::write_websocket_frame(strm_, Opcode::Pong, payload.data(),
-              payload.size(), true, !is_server_);
-            continue;
-          }
-          case Opcode::Pong: {
-            std::lock_guard<std::mutex> lock(ping_mutex_);
-            unacked_pings_ = 0;
-            continue;
-          }
-          case Opcode::Close: {
-            if (!closed_.exchange(true)) {
-              // Echo close frame back
-              std::lock_guard<std::mutex> lock(write_mutex_);
-              detail::write_websocket_frame(strm_, Opcode::Close, payload.data(),
-                payload.size(), true, !is_server_);
-            }
-            return Fail;
-          }
-          case Opcode::Text:
-          case Opcode::Binary: {
-            auto result = opcode == Opcode::Text ? Text : Binary;
-            msg = std::move(payload);
-
-            // Handle fragmentation
-            if (!fin) {
-              while (true) {
-                Opcode cont_opcode;
-                std::string cont_payload;
-                bool cont_fin;
-                if (!impl::read_websocket_frame(
-                  strm_, cont_opcode, cont_payload, cont_fin, is_server_,
-                  CPPHTTPLIB_WEBSOCKET_MAX_PAYLOAD_LENGTH)) {
-                  closed_ = true;
-                  return Fail;
-                }
-                if (cont_opcode == Opcode::Ping) {
-                  std::lock_guard<std::mutex> lock(write_mutex_);
-                  detail::write_websocket_frame(
-                    strm_, Opcode::Pong, cont_payload.data(), cont_payload.size(),
-                    true, !is_server_);
-                  continue;
-                }
-                if (cont_opcode == Opcode::Pong) {
-                  std::lock_guard<std::mutex> lock(ping_mutex_);
-                  unacked_pings_ = 0;
-                  continue;
-                }
-                if (cont_opcode == Opcode::Close) {
-                  if (!closed_.exchange(true)) {
-                    std::lock_guard<std::mutex> lock(write_mutex_);
-                    detail::write_websocket_frame(
-                      strm_, Opcode::Close, cont_payload.data(),
-                      cont_payload.size(), true, !is_server_);
-                  }
-                  return Fail;
-                }
-                // RFC 6455: continuation frames must use opcode 0x0
-                if (cont_opcode != Opcode::Continuation) {
-                  closed_ = true;
-                  return Fail;
-                }
-                msg += cont_payload;
-                if (msg.size() > CPPHTTPLIB_WEBSOCKET_MAX_PAYLOAD_LENGTH) {
-                  closed_ = true;
-                  return Fail;
-                }
-                if (cont_fin) { break; }
-              }
-            }
-            // RFC 6455 Section 5.6: text frames must contain valid UTF-8
-            if (result == Text && !impl::is_valid_utf8(msg)) {
-              close(CloseStatus::InvalidPayload, "invalid UTF-8");
-              return Fail;
-            }
-            return result;
-          }
-          default: closed_ = true; return Fail;
-        }
-      }
-      return Fail;
-    }
-
-    inline bool WebSocket::send(const std::string &data) {
-      return send_frame(Opcode::Text, data.data(), data.size());
-    }
-
-    inline bool WebSocket::send(const char *data, size_t len) {
-      return send_frame(Opcode::Binary, data, len);
-    }
-
-    inline void WebSocket::close(CloseStatus status, const std::string &reason) {
-      if (closed_.exchange(true)) { return; }
-      ping_cv_.notify_all();
-      std::string payload;
-      auto code = static_cast<uint16_t>(status);
-      payload.push_back(static_cast<char>((code >> 8) & 0xFF));
-      payload.push_back(static_cast<char>(code & 0xFF));
-      // RFC 6455 Section 5.5: control frame payload must not exceed 125 bytes
-      // Close frame has 2-byte status code, so reason is limited to 123 bytes
-      payload += reason.substr(0, 123);
-      {
-        std::lock_guard<std::mutex> lock(write_mutex_);
-        detail::write_websocket_frame(strm_, Opcode::Close, payload.data(),
-          payload.size(), true, !is_server_);
-      }
-
-      // RFC 6455 Section 7.1.1: after sending a Close frame, wait for the peer's
-      // Close response before closing the TCP connection. Use a short timeout to
-      // avoid hanging if the peer doesn't respond.
-      strm_.set_read_timeout(CPPHTTPLIB_WEBSOCKET_CLOSE_TIMEOUT_SECOND, 0);
-      Opcode op;
-      std::string resp;
-      bool fin;
-      while (impl::read_websocket_frame(strm_, op, resp, fin, is_server_, 125)) {
-        if (op == Opcode::Close) { break; }
-      }
-    }
-
-    inline WebSocket::~WebSocket() {
-      {
-        std::lock_guard<std::mutex> lock(ping_mutex_);
-        closed_ = true;
-      }
-      ping_cv_.notify_all();
-      if (ping_thread_.joinable()) { ping_thread_.join(); }
-    }
-
-    inline void WebSocket::start_heartbeat() {
-      if (ping_interval_sec_ == 0) { return; }
-      ping_thread_ = std::thread([this]() {
-        std::unique_lock<std::mutex> lock(ping_mutex_);
-        while (!closed_) {
-          ping_cv_.wait_for(lock, std::chrono::seconds(ping_interval_sec_));
-          if (closed_) { break; }
-          // If the peer has failed to respond to the previous pings, give up.
-          // RFC 6455 does not define a pong-timeout mechanism; this is an
-          // opt-in liveness check controlled by max_missed_pongs_.
-          if (max_missed_pongs_ > 0 && unacked_pings_ >= max_missed_pongs_) {
-            lock.unlock();
-            close(CloseStatus::GoingAway, "pong timeout");
-            return;
-          }
-          lock.unlock();
-          if (!send_frame(Opcode::Ping, nullptr, 0)) {
-            lock.lock();
-            closed_ = true;
-            break;
-          }
-          lock.lock();
-          unacked_pings_++;
-        }
-        });
-    }
-
-    inline const Request &WebSocket::request() const { return req_; }
-
-    inline bool WebSocket::is_open() const { return !closed_; }
-
-    // WebSocketClient implementation
-    inline WebSocketClient::WebSocketClient(
-      const std::string &scheme_host_port_path, const Headers &headers)
-      : headers_(headers) {
-      detail::UrlComponents uc;
-      if (detail::parse_url(scheme_host_port_path, uc) && !uc.scheme.empty() &&
-        !uc.host.empty() && !uc.path.empty()) {
-        auto &scheme = uc.scheme;
-
-#ifdef CPPHTTPLIB_SSL_ENABLED
-        if (scheme != "ws" && scheme != "wss") {
-#else
-        if (scheme != "ws") {
-#endif
-#ifndef CPPHTTPLIB_NO_EXCEPTIONS
-          std::string msg = "'" + scheme + "' scheme is not supported.";
-          throw std::invalid_argument(msg);
-#endif
-          return;
-        }
-
-        auto is_ssl = scheme == "wss";
-
-        host_ = std::move(uc.host);
-
-        port_ = is_ssl ? 443 : 80;
-        if (!uc.port.empty() && !detail::parse_port(uc.port, port_)) { return; }
-
-        path_ = std::move(uc.path);
-        if (!uc.query.empty()) { path_ += uc.query; }
-
-#ifdef CPPHTTPLIB_SSL_ENABLED
-        is_ssl_ = is_ssl;
-        if (is_ssl_) {
-          // The context lives as long as the client so that CA configuration
-          // survives reconnects; sessions are created per connection.
-          tls_ctx_ = tls::create_client_context();
-          if (!tls_ctx_) { return; }
-        }
-#else
-        if (is_ssl) { return; }
-#endif
-
-        is_valid_ = true;
-      }
-    }
-
-#ifdef CPPHTTPLIB_SSL_ENABLED
-    inline WebSocketClient::WebSocketClient(
-      const std::string & scheme_host_port_path, const PemMemory & pem,
-      const Headers & headers)
-      : WebSocketClient(scheme_host_port_path, headers) {
-      // For ws:// URLs the client certificate is silently ignored, consistent
-      // with the TLS-only setters such as set_ca_cert_path().
-      if (is_valid_ && is_ssl_ && pem.cert_pem && pem.key_pem) {
-        if (!tls::set_client_cert_pem(tls_ctx_, pem.cert_pem, pem.key_pem,
-          pem.private_key_password)) {
-          tls::free_context(tls_ctx_);
-          tls_ctx_ = nullptr;
-          is_valid_ = false;
-        }
-      }
-    }
-#endif
-
-    inline WebSocketClient::~WebSocketClient() {
-      shutdown_and_close();
-#ifdef CPPHTTPLIB_SSL_ENABLED
-      if (tls_ctx_) {
-        tls::free_context(tls_ctx_);
-        tls_ctx_ = nullptr;
-      }
-#endif
-    }
-
-    inline bool WebSocketClient::is_valid() const { return is_valid_; }
-
-    inline void WebSocketClient::shutdown_and_close() {
-      // Send the close frame while the TLS session is still alive: ws_ holds an
-      // SSLSocketStream that keeps a raw pointer to tls_session_, so the session
-      // must outlive ws_->close() and ws_.reset() to avoid a use-after-free.
-      if (ws_ && ws_->is_open()) { ws_->close(); }
-      ws_.reset();
-#ifdef CPPHTTPLIB_SSL_ENABLED
-      if (is_ssl_) {
-        if (tls_session_) {
-          tls::shutdown(tls_session_, true);
-          tls::free_session(tls_session_);
-          tls_session_ = nullptr;
-        }
-      }
-#endif
-      if (sock_ != INVALID_SOCKET) {
-        detail::shutdown_socket(sock_);
-        detail::close_socket(sock_);
-        sock_ = INVALID_SOCKET;
-      }
-    }
-
-    inline bool WebSocketClient::create_stream(std::unique_ptr<Stream> &strm,
-      Error & error, int &ssl_error,
-      uint64_t & ssl_backend_error) {
-#ifdef CPPHTTPLIB_SSL_ENABLED
-      if (is_ssl_) {
-        // A plain flag rather than SSLClient::load_certs()'s call_once: connect()
-        // is not safe to call concurrently on one client to begin with, since
-        // nothing else here is guarded either.
-        if (server_certificate_verification_ && !certs_loaded_) {
-          uint64_t backend_error = 0;
-          detail::load_client_ca_config(tls_ctx_, ca_cert_file_path_,
-            ca_cert_dir_path_, custom_ca_loaded_,
-            system_ca_mode_, backend_error);
-          certs_loaded_ = true;
-        }
-
-        detail::ClientTlsSessionOptions options;
-        options.server_hostname_verification = server_hostname_verification_;
-
-        detail::ClientTlsSessionError tls_error;
-        if (!detail::setup_client_tls_session(host_, tls_ctx_, tls_session_, sock_,
-          server_certificate_verification_,
-          read_timeout_sec_, read_timeout_usec_,
-          &tls_error, options)) {
-          error = tls_error.error;
-          ssl_error = tls_error.ssl_error;
-          ssl_backend_error = tls_error.backend_error;
-          return false;
-        }
-
-        strm = std::unique_ptr<Stream>(new detail::SSLSocketStream(
-          sock_, tls_session_, read_timeout_sec_, read_timeout_usec_,
-          write_timeout_sec_, write_timeout_usec_));
-        return true;
-      }
-#else
-      (void)error;
-      (void)ssl_error;
-      (void)ssl_backend_error;
-#endif
-      strm = std::unique_ptr<Stream>(
-        new detail::SocketStream(sock_, read_timeout_sec_, read_timeout_usec_,
-          write_timeout_sec_, write_timeout_usec_));
-      return true;
-    }
-
-    inline void WebSocketClient::prepare_default_headers(Request & req) {
-#ifdef CPPHTTPLIB_SSL_ENABLED
-      auto is_ssl = is_ssl_;
-#else
-      auto is_ssl = false;
-#endif
-
-      if (!req.has_header("Host")) {
-        req.headers.emplace("Host", detail::make_default_host_header_value(
-          host_, port_, is_ssl, address_family_));
-      }
-
-      detail::add_default_user_agent_header(req);
-    }
-
-    inline Result WebSocketClient::connect() {
-      if (!is_valid_) { return Result{Error::Connection, -1, Headers{}}; }
-      shutdown_and_close();
-
-      // Check is custom IP or hostname specified for host_
-      std::string connect_host;
-      std::string ip;
-      detail::apply_addr_map(addr_map_, host_, connect_host, ip);
-
-      auto error = Error::Success;
-      sock_ = detail::create_client_socket(
-        connect_host, ip, port_, address_family_, tcp_nodelay_, ipv6_v6only_,
-        socket_options_, connection_timeout_sec_, connection_timeout_usec_,
-        read_timeout_sec_, read_timeout_usec_, write_timeout_sec_,
-        write_timeout_usec_, interface_, error);
-
-      if (sock_ == INVALID_SOCKET) {
-        if (error == Error::Success) { error = Error::Connection; }
-        return Result{error, -1, Headers{}};
-      }
-
-      std::unique_ptr<Stream> strm;
-      auto stream_error = Error::SSLConnection;
-      int ssl_error = 0;
-      uint64_t ssl_backend_error = 0;
-      if (!create_stream(strm, stream_error, ssl_error, ssl_backend_error)) {
-        shutdown_and_close();
-#ifdef CPPHTTPLIB_SSL_ENABLED
-        return Result{stream_error, -1, Headers{}, ssl_error, ssl_backend_error};
-#else
-        return Result{stream_error, -1, Headers{}};
-#endif
-      }
-
-      Request req;
-      req.method = "GET";
-      req.path = path_;
-      req.headers = headers_;
-      prepare_default_headers(req);
-
-      detail::WebSocketUpgradeResponse upgrade;
-      if (!detail::perform_websocket_handshake(*strm, req, upgrade)) {
-        shutdown_and_close();
-        return Result{upgrade.error, upgrade.status, std::move(upgrade.headers)};
-      }
-      subprotocol_ = std::move(upgrade.selected_subprotocol);
-
-      ws_ = std::unique_ptr<WebSocket>(new WebSocket(std::move(strm), req, false,
-        websocket_ping_interval_sec_,
-        websocket_max_missed_pongs_));
-      return Result{Error::Success, upgrade.status, std::move(upgrade.headers)};
-    }
-
-    inline ReadResult WebSocketClient::read(std::string & msg) {
-      if (!ws_) { return Fail; }
-      return ws_->read(msg);
-    }
-
-    inline bool WebSocketClient::send(const std::string & data) {
-      if (!ws_) { return false; }
-      return ws_->send(data);
-    }
-
-    inline bool WebSocketClient::send(const char *data, size_t len) {
-      if (!ws_) { return false; }
-      return ws_->send(data, len);
-    }
-
-    inline void WebSocketClient::close(CloseStatus status,
-      const std::string & reason) {
-      if (ws_) { ws_->close(status, reason); }
-    }
-
-    inline bool WebSocketClient::is_open() const { return ws_ && ws_->is_open(); }
-
-    inline const std::string &WebSocketClient::subprotocol() const {
-      return subprotocol_;
-    }
-
-    inline void WebSocketClient::set_read_timeout(time_t sec, time_t usec) {
-      read_timeout_sec_ = sec;
-      read_timeout_usec_ = usec;
-    }
-
-    inline void WebSocketClient::set_write_timeout(time_t sec, time_t usec) {
-      write_timeout_sec_ = sec;
-      write_timeout_usec_ = usec;
-    }
-
-    inline void WebSocketClient::set_websocket_ping_interval(time_t sec) {
-      websocket_ping_interval_sec_ = sec;
-    }
-
-    inline void WebSocketClient::set_websocket_max_missed_pongs(int count) {
-      websocket_max_missed_pongs_ = count;
-    }
-
-    inline void WebSocketClient::set_tcp_nodelay(bool on) { tcp_nodelay_ = on; }
-
-    inline void WebSocketClient::set_address_family(int family) {
-      address_family_ = family;
-    }
-
-    inline void WebSocketClient::set_ipv6_v6only(bool on) { ipv6_v6only_ = on; }
-
-    inline void WebSocketClient::set_socket_options(SocketOptions socket_options) {
-      socket_options_ = std::move(socket_options);
-    }
-
-    inline void WebSocketClient::set_connection_timeout(time_t sec, time_t usec) {
-      connection_timeout_sec_ = sec;
-      connection_timeout_usec_ = usec;
-    }
-
-    inline void WebSocketClient::set_interface(const std::string & intf) {
-      interface_ = intf;
-    }
-
-    inline void WebSocketClient::set_hostname_addr_map(
-      std::map<std::string, std::string> addr_map) {
-      addr_map_ = std::move(addr_map);
-    }
-
-#ifdef CPPHTTPLIB_SSL_ENABLED
-
-    inline void
-      WebSocketClient::set_ca_cert_path(const std::string & ca_cert_file_path,
-        const std::string & ca_cert_dir_path) {
-      ca_cert_file_path_ = ca_cert_file_path;
-      ca_cert_dir_path_ = ca_cert_dir_path;
-    }
-
-    inline void WebSocketClient::set_ca_cert_store(tls::ca_store_t store) {
-      if (store && tls_ctx_) {
-        // set_ca_store takes ownership of store
-        tls::set_ca_store(tls_ctx_, store);
-        custom_ca_loaded_ = true;
-      } else if (store) {
-        tls::free_ca_store(store);
-      }
-    }
-
-    inline void WebSocketClient::load_ca_cert_store(const char *ca_cert,
-      std::size_t size) {
-      if (tls_ctx_ && ca_cert && size > 0) {
-        tls::load_ca_pem(tls_ctx_, ca_cert, size);
-        custom_ca_loaded_ = true;
-      }
-    }
-
-    inline void
-      WebSocketClient::enable_server_certificate_verification(bool enabled) {
-      server_certificate_verification_ = enabled;
-    }
-
-    inline void WebSocketClient::enable_server_hostname_verification(bool enabled) {
-      server_hostname_verification_ = enabled;
-    }
-
-    inline void WebSocketClient::enable_system_ca(bool enabled) {
-      system_ca_mode_ = enabled ? SystemCAMode::Enabled : SystemCAMode::Disabled;
-    }
-
-#endif // CPPHTTPLIB_SSL_ENABLED
-
-  } // namespace ws
-
-  // ----------------------------------------------------------------------------
-
 } // namespace httplib
-
-#endif // CPPHTTPLIB_HTTPLIB_H
 
 // Copyright(c) 2017 yhirose
 // 
