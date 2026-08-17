@@ -1,60 +1,42 @@
-#include "argparse.hpp"
-#include "mcfg.hpp"
-#include "mlog.hpp"
+#include <common.hpp>
 
-#include "commands.hpp"
-
-void add_common(argparse::ArgumentParser &parser) {
-  parser.add_argument("-v", "--verbose")
-    .help("Enable verbose logging")
-    .flag();
-  parser.add_argument("-q", "--quiet")
-    .help("Disable any errors, warnings and status reports")
-    .flag();
-  parser.add_argument("-c", "--config")
-    .help("Specify the config file to use")
-    .metavar("PATH");
-}
+[[noreturn]] void command_ls(char **argv);
+[[noreturn]] void command_new(char **argv);
+[[noreturn]] void command_edit(char **argv);
+[[noreturn]] void command_rm(char **argv);
+[[noreturn]] void command_auth(char **argv);
+[[noreturn]] void command_help(char **argv);
 
 int main(int argc, char **argv) {
-  mlog::timestamps = false;
-#ifdef DEBUG
-  mlog::level = mlog::Level::Debug;
+#ifdef _WIN32
+  config::read(std::string(getenv("APPDATA")) + "\\mclip\\config.ini");
+#else
+  config::read(std::string(getenv("HOME")) + "/.config/mclip/config.ini");
 #endif
 
-  argparse::ArgumentParser program("mclip", "indev", argparse::default_arguments::all);
+  int i = 1;
 
-  argparse::ArgumentParser sub_text("text", "", argparse::default_arguments::help);
-  sub_text.add_description("Create a text item and print it's ID");
-  sub_text.add_argument("TEXT")
-    .help("Text to store. '_' to read from stdin");
-  sub_text.add_argument("-n", "--name")
-    .help("Name of the item. Empty by default")
-    .metavar("NAME");
-  add_common(sub_text);
-  program.add_subparser(sub_text);
-
-  argparse::ArgumentParser sub_file("file", "", argparse::default_arguments::help);
-  sub_file.add_description("Create a file item and print it's ID");
-  sub_file.add_argument("FILE")
-    .help("Path to the file. '-' to read from stdin");
-  sub_file.add_argument("-n", "--name")
-    .help("Name of the item. Defaults to the name of the source")
-    .metavar("NAME");
-  add_common(sub_file);
-  program.add_subparser(sub_file);
-
-  program.add_epilog("Type `mclip <subcommand> --help` to see command-specific parameters.");
-
-  try {
-    program.parse_args(argc, argv);
-  } catch (const std::exception &err) {
-    mlog::debug(typeid(err).name());
-    mlog::fatal(err.what());
-    exit(1);
+  // Parse global flags
+  for (; i < argc and argv[i][0] == '-'; ++i) {
+    if (!strcmp(argv[i], "-q")) log::quiet = true;
+    else if (!strcmp(argv[i], "-v")) log::verbose = true;
+    else {
+      log::fatal("Unknown flag: '", argv[i], '\'');
+      log::info("See 'mclip help'");
+      return 1;
+    }
   }
-  if (program.is_subcommand_used(sub_text))  create_text(sub_text);
-  if (program.is_subcommand_used(sub_file))  create_file(sub_file);
-  mlog::fatal("Need a command. Type `mclip --help` for help.");
-  exit(1);
+
+  // Pass the control to a command handler
+  if (!argv[i]) log::fatal("Expected a command; see 'mclip help'");
+  else if (!strcmp(argv[i], "ls"))   command_ls(argv + i + 1);
+  else if (!strcmp(argv[i], "new"))  command_new(argv + i + 1);
+  else if (!strcmp(argv[i], "edit")) command_edit(argv + i + 1);
+  else if (!strcmp(argv[i], "rm"))   command_rm(argv + i + 1);
+  else if (!strcmp(argv[i], "auth"))  command_auth(argv + i + 1);
+  else if (!strcmp(argv[i], "help")) command_help(argv + i + 1);
+  else log::fatal("Unknown command: '", argv[i], "'; see 'mclip help'");
+
+  std::cerr << "";
+  return 1;
 }

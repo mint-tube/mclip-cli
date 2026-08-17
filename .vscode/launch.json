@@ -2,20 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "CodeLLDB",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/.debug/mclip",
-      "args": [
-        "${input:userArgs}"
-      ],
-      "cwd": "${workspaceFolder}",
-    },
-    {
       "name": "C/C++ gdb",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/.debug/mclip",
+      "program": "${workspaceFolder}/mclip",
       "args": [
         "${input:userArgs}"
       ],
@@ -23,12 +13,10 @@
       "MIMode": "gdb",
       "setupCommands": [
         {
-          "description": "Enable pretty-printing for gdb",
           "text": "-enable-pretty-printing",
           "ignoreFailures": true
         },
         {
-          "description": "Set Disassembly Flavor to Intel",
           "text": "-gdb-set disassembly-flavor intel",
           "ignoreFailures": true
         }
@@ -39,7 +27,7 @@
     {
       "id": "userArgs",
       "type": "promptString",
-      "description": "Введите аргументы для программы"
+      "description": "Enter arguments for the program"
     }
   ]
 }
